@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/index.css">  
+    
+    <title>test espress app</title>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-custom navbar-mainbg" id="nav" v-cloak>
+        <a class="navbar-brand navbar-logo" href="/"><img src="/img/woolly-mc.png" 
+            width="40" height="50" alt="Welcome">Welcome</a>
+        <button class="navbar-toggler" type="button" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars text-white"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0);"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="javascript:void(0);"><i class="far fa-address-book"></i>Address Book</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0);"><i class="far fa-clone"></i>Components</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0);"><i class="far fa-calendar-alt"></i>Calendar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0);"><i class="far fa-chart-bar"></i>Charts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0);"><i class="far fa-copy"></i>Documents</a>
+                </li>
+            </ul>
+            <div id="exitplace"></div>
+        </div>
+    </nav>
+
+
+
+
+   <!-- <h3>Hello user of server</h3>-->
+    <!-- <div id="exitplace" style="position: absolute; top: 15px; right: 10px;"></div> -->
+    <a href="/welcome">ТІК</a>
+    <a href="/cool.html">cool</a>
+    <a href="/ask">ask</a>
+    <a href="/truly.html"> Go to Make toasts</a>
+
+
+   
+
+
+
+    <style>
+        [v-cloak]{
+            display: none ;
+        }
+    </style>
+    
+    <div class="conteiner pt-5" id="app" v-cloak>
+        <div class="card center">
+            <h1> {{title}}:  {{ counter }}</h1>  <!--Интерполяция -->
+            <div> 
+                <button class="btn primary" v-on:click="counter++"> do </button> <!-- Посредством интреполяции предоставленой Vue возможно реализовать прослушивание и обработку событий-->
+                <button class= "btn danger" v-on:click="counter--"> undo</button> 
+            </div>
+        </div>
+        <div class="card">
+            <h1 :style="{
+                color: inputValue.length > 6 ? 'darkblue': inputValue.trim() == 'Wrong' ? 'darkred' : '',
+                fontSize:inputValue.length > 12 ? '4rem' : '' ,
+            }"> {{titleforfun}}</h1>  <!--Интерполяция    v-bind:value="inputValue"    v-on:input="inputChangeHandler"  прослушиватель замененный v-model-->
+           <div class="form-control">
+               <input type="text" v-bind:placeholder="placeholderForFun" 
+               v-model="inputValue"
+               v-on:keypress.enter="addNote" />  <!--В случае использования Js реализации |=> v-on:keypress="inputKeyPress" -->
+           </div>
+           <h2>{{inputValue}}</h2>
+           <button class="btn" v-on:click="addNote">Add</button>
+        <hr />
+        <br/>
+        <ul class="list" v-if="notes.length !== 0">
+            <li class="list-item" v-for="(note,idx) in notes"> <!--Иной метод -->
+                <!--<span :class=" note.length > 5 ? 'primary' : 'bold' "> {{idx}} => {{note}}</span> -->
+                <!-- <span :class ="{
+                'primary':true,
+                'bold':note.length > 5
+                }"> {{idx}} => {{note}}</span> второй способ байнд стилей через объект -->
+                <span :class ="['bold',{'primary':note.length>5}]
+                    "> {{idx}} => {{note}}</span> 
+    
+                <button class="btn danger" v-on:click="buttonDeletePrikol(note,idx,$event)"> Delete прикол </button>
+            </li>
+            <hr/>
+            <li>
+                <strong>ALL прикол: {{ notes.length}} | Send aux : {{ doubleCount}}</strong>
+            </li>
+        </ul>
+        <div v-if="notes.length ==0">
+        <div class="spinner" >
+            Cteate your oun прикол
+            <div></div>
+            <div></div>
+        </div>
+        <br/><br>
+        </div>
+
+        </div>
+    </div>
+
+
+    
+    
+    
+   <script src="https://kit.fontawesome.com/1236b9c95c.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@next"></script> <!-- Не забывай про порядок включение скриптов -->
+    <script src="/js/uuidv4.min.js"></script>
+    <script src="/js/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+    <script src="/js/helper.js"></script>
+    <script src="/js/index.js"></script>
+    <script src="/js/vueRealeazation.js"></script>
+    <script src="/js/navbar.js"></script>
+
+
+</body>
+</html>

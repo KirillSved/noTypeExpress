@@ -1,0 +1,9 @@
+/node_modules/
+/public/uploads
+/public/minify-js
+/public/css/main.min.css
+/greenlock.d
+config.json
+/.env
+/public/share/schemes_files/*.svg
+/JWT.txt

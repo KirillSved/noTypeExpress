@@ -1,0 +1,698 @@
+/*custom font*/
+@import url(https://fonts.googleapis.com/css?family=Montserrat);
+
+/*basic reset*/
+* {margin: 0; padding: 0; box-sizing: border-box;}
+
+
+body {
+  
+  background-image: linear-gradient(-225deg, #E3FDF5 0%, #FFE6FA 100%);
+background-image: linear-gradient(to top, #a8edea 0%, #fed6e3 100%);
+background-attachment: fixed;
+  background-repeat: no-repeat;
+
+    font-family: 'Vibur', cursive;
+/*   the main font */
+    font-family: 'Abel', sans-serif;
+opacity: .95;
+}
+
+.b-hide {
+  display: block;
+  animation: hideBlock 0.7s linear forwards;
+}
+.b-show {
+  display: block;
+
+  animation: showBlock 0.7s linear forwards;
+}
+@keyframes showBlock {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes hideBlock {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+/*inputs*/
+/*headings*/
+
+/*------------------------------ END OF MSFORM--------------------------------------*/
+/*------------------------------------------------------------------------------
+----------------------------------
+                                          TIME TO COMPLETE FORM 
+-----------------------------------------------------------
+------------------------------------------------------------*/
+/* Fonts Form Google Font ::- https://fonts.google.com/  -:: */
+
+
+
+/* |||||||||||||||||||||||||||||||||||||||||||||*/
+/* //////////////////////////////////////////// */
+
+
+
+
+/* End body rules */
+/*
+------------------------------------------------------------------------------
+                              REGISTER FORM OVERFORM
+------------------------------------------------------------------------------
+*/
+
+
+
+#overform {
+	
+  width: 500px;
+  height: 600px;
+	margin: 50px auto;
+	text-align: center;
+	position: relative;
+}
+#overform fieldset {
+	background-image: linear-gradient(-225deg, #E3FDF5 50%, #FFE6FA 50%);
+	border: 0 none;
+	border-radius: 3px;
+	box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+	padding: 20px 30px;
+	box-sizing: border-box;
+	width: 80%;
+	margin: 0 10% 0 14%;
+	
+	/*stacking fieldsets above each other*/
+	position: relative;
+}
+/*Hide all except first fieldset*/
+#overform fieldset:not(:first-of-type) {
+	display: none;
+}
+
+#overform  .fs-title {
+	font-size: 15px;
+	text-transform: uppercase;
+	color: #2C3E50;
+	margin-bottom: 10px;
+}
+#overform .fs-subtitle {
+	font-weight: normal;
+	font-size: 13px;
+	color: #666;
+	margin-bottom: 20px;
+}
+/*progressbar*/
+#overform  #progressbar {
+	margin-bottom: 30px;
+	overflow: hidden;
+	/*CSS counters to number the steps*/
+	counter-reset: step;
+}
+#overform  #progressbar li {
+	list-style-type: none;
+	color: white;
+	text-transform: uppercase;
+	font-size: 9px;
+	width: 33.33%;
+	float: left;
+	position: relative;
+}
+#overform #progressbar li:before {
+	content: counter(step);
+	counter-increment: step;
+	width: 20px;
+	line-height: 20px;
+	display: block;
+	font-size: 10px;
+	color: #333;
+	background: white;
+	border-radius: 3px;
+	margin: 0 auto 5px auto;
+}
+/*progressbar connectors*/
+#overform #progressbar li:after {
+	content: '';
+	width: 100%;
+	height: 2px;
+	background: white;
+	position: absolute;
+	left: -54%;
+	top: 9px;
+	z-index: -1; /*put it behind the numbers*/
+}
+#overform #progressbar li:first-child:after {
+	/*connector not needed before the first step*/
+	content: none; 
+}
+/*marking active/completed steps green*/
+/*The number of the step and the connector before it = green*/
+#overform #progressbar li.active:before,  #progressbar li.active:after{
+	background: #27AE60;
+	color: white;
+}
+
+
+
+/* #overform form {
+    width: 450px;
+    min-height: 500px;
+    height: auto;
+    border-radius: 5px;
+    margin: 2% auto;
+    box-shadow: 0 9px 50px hsla(20, 67%, 75%, 0.31);
+    padding: 2%;
+ 
+} */
+/* form Container */
+#overform form .con {
+    display: -webkit-flex;
+    display: flex;
+  
+    -webkit-justify-content: space-around;
+    justify-content: space-around;
+  
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+  
+      margin: 0 auto;
+}
+
+/* the header form form */
+#overform header {
+    margin: 2% auto 10% auto;
+    text-align: center;
+}
+/* Login title form form */
+#overform header h2 {
+    font-size: 250%;
+    font-family: 'Playfair Display', serif;
+    color: #3e403f;
+}
+/*  A welcome message or an explanation of the login form */
+#overform header p {letter-spacing: 0.05em;}
+
+
+
+/* //////////////////////////////////////////// */
+/* //////////////////////////////////////////// */
+#overform .toast-header{
+    height: 50px;
+}
+ 
+#overform .input-item {
+    background: #fff;
+    color: #333;
+    padding: 15.5px 0px 17px 9px;
+    border-radius: 5px 0px 0px 5px;
+}
+
+
+#overform #goConfirm {
+  background: #fff;
+  color:  #3b6759;
+
+  margin: 5.9px 0 0 0;
+  margin-top: 4%;
+  margin-left: -20px;
+  padding: 15px 9px 19px 0px;
+  border-radius: 0px 5px 5px 0px;
+
+  float: right;
+  position: relative;
+  right: 10%;
+  top: -.2%;
+  z-index: 5;
+  
+  cursor: pointer;
+}
+
+#overform #askUs {
+  background: #fff;
+  color: #333;
+
+  margin: 5.9px 0 0 0;
+  margin-top: 4%;
+  margin-left: -20px;
+  padding: 15px 9px 19px 0px;
+  border-radius: 0px 5px 5px 0px;
+
+  float: right;
+  position: relative;
+  right: 10%;
+  top: -.2%;
+  z-index: 5;
+  
+  cursor: pointer;
+}
+
+/* Show/hide password Font Icon */
+#overform #eye {
+    background: #fff;
+    color: #333;
+  
+    margin: 5.9px 0 0 0;
+    margin-top: 4%;
+    margin-left: -20px;
+    padding: 15px 9px 19px 0px;
+    border-radius: 0px 5px 5px 0px;
+  
+    float: right;
+    position: relative;
+    right: 10%;
+    top: -.2%;
+    z-index: 5;
+    
+    cursor: pointer;
+}
+/* inputs form  */
+#overform input[class="form-input"]{
+    width: 240px;
+    height: 50px;
+  
+    margin-top: 4%;
+    padding: 15px;
+    
+    font-size: 16px;
+    font-family: 'Abel', sans-serif;
+    color: #5E6472;
+  
+    outline: none;
+    border: none;
+  
+    border-radius: 0px 5px 5px 0px;
+    transition: 0.2s linear;
+    
+}
+#overform input[id="login"] {width: 250px;}
+/* focus  */
+#overform  input:focus {
+    transform: translateX(-2px);
+    border-radius: 5px;
+}
+
+/* //////////////////////////////////////////// */
+/* //////////////////////////////////////////// */
+
+/* input[type="text"] {min-width: 250px;} */
+/* buttons  */
+#overform  button {
+    display: inline-block;
+    color: #252537;
+  
+    width: 250px;
+    height: 50px;
+  
+    padding: 0 20px;
+    background: #ffffff;
+    border-radius: 5px;
+    
+    outline: none;
+    border: none;
+  
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s linear;
+    
+    margin: 4% auto;
+    letter-spacing: 0.05em;
+}
+/* Submits */
+#overform .submits{
+    width: 40%;
+    display: inline-block;
+    float: left;
+    margin-left: 9%;
+}
+#overform .submits[id="next"]{
+  
+  margin-left: 2%;
+}
+#overform .submits[id="registerbtn"]{
+  
+  margin-left: 2%;
+}
+#overform .submits[id="forgotbtn"]{
+  
+  margin-left: 2%;
+}
+
+#overform .submits[id="conCode"]{
+  margin-left: 2%;
+}
+/*       Forgot Password button FAF3DD  */
+#overform .frgt-pass {background: transparent;}
+
+/*     Sign Up button  */
+#overform .sign-up {background: #B8F2E6;}
+
+
+/* buttons hover */
+#overform button:hover {
+    transform: translatey(3px);
+    box-shadow: none;
+}
+
+/* buttons hover Animation */
+#overform button:hover {
+    animation: ani9 0.4s ease-in-out infinite alternate;
+}
+@keyframes ani9 {
+    0% {
+        transform: translateY(3px);
+    }
+    100% {
+        transform: translateY(5px);
+    }
+}
+
+ 
+/*---------------------------------------------------------------------------
+                                END OF FORM
+-------------------------------------------------------------*/
+/* Start form  attributes */
+#overL form {
+    width: 450px;
+    min-height: 500px;
+    height: auto;
+    border-radius: 5px;
+    margin: 2% auto;
+    box-shadow: 0 9px 50px hsla(20, 67%, 75%, 0.31);
+    padding: 2%;
+    background-image: linear-gradient(-225deg, #E3FDF5 50%, #FFE6FA 50%);
+}
+/* form Container */
+#overL form .con {
+    display: -webkit-flex;
+    display: flex;
+  
+    -webkit-justify-content: space-around;
+    justify-content: space-around;
+  
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+  
+      margin: 0 auto;
+}
+
+/* the header form form */
+#overL header {
+    margin: 2% auto 10% auto;
+    text-align: center;
+}
+/* Login title form form */
+#overL header h2 {
+    font-size: 250%;
+    font-family: 'Playfair Display', serif;
+    color: #3e403f;
+}
+/*  A welcome message or an explanation of the login form */
+#overL header p {letter-spacing: 0.05em;}
+
+
+
+/* //////////////////////////////////////////// */
+/* //////////////////////////////////////////// */
+#overL .toast-header{
+    height: 50px;
+}
+
+#overL .input-item {
+    background: #fff;
+    color: #333;
+    padding: 15.5px 0px 17px 9px;
+    border-radius: 5px 0px 0px 5px;
+}
+
+
+
+/* Show/hide password Font Icon */
+#eye {
+    background: #fff;
+    color: #333;
+  
+    margin: 5.9px 0 0 0;
+    margin-left: -20px;
+    padding: 15px 9px 19px 0px;
+    border-radius: 0px 5px 5px 0px;
+  
+    float: right;
+    position: relative;
+    right: 1%;
+    top: -.2%;
+    z-index: 5;
+    
+    cursor: pointer;
+}
+/* inputs form  */
+#overL input[class="form-input"]{
+    width: 240px;
+    height: 50px;
+  
+    margin-top: 2%;
+    padding: 15px;
+    
+    font-size: 16px;
+    font-family: 'Abel', sans-serif;
+    color: #5E6472;
+  
+    outline: none;
+    border: none;
+  
+    border-radius: 0px 5px 5px 0px;
+    transition: 0.2s linear;
+    
+}
+#overL input[id="login"] {width: 250px;}
+/* focus  */
+#overL input:focus {
+    transform: translateX(-2px);
+    border-radius: 5px;
+}
+
+/* //////////////////////////////////////////// */
+/* //////////////////////////////////////////// */
+
+/* input[type="text"] {min-width: 250px;} */
+/* buttons  */
+#overL button {
+    display: inline-block;
+    color: #252537;
+  
+    width: 280px;
+    height: 50px;
+  
+    padding: 0 20px;
+    background: #fff;
+    border-radius: 5px;
+    
+    outline: none;
+    border: none;
+  
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s linear;
+    
+    margin: 7% auto;
+    letter-spacing: 0.05em;
+}
+/* Submits */
+#overL .submits {
+    width: 46%;
+    display: inline-block;
+    float: left;
+    margin-left: 2%;
+}
+
+/*       Forgot Password button FAF3DD  */
+#overL .frgt-pass {background: transparent;}
+
+/*     Sign Up button  */
+.sign-up {background: #B8F2E6;}
+
+
+/* buttons hover */
+#overL button:hover {
+    transform: translatey(3px);
+    box-shadow: none;
+}
+
+/* buttons hover Animation */
+#overL button:hover {
+    animation: ani9 0.4s ease-in-out infinite alternate;
+}
+@keyframes ani9 {
+    0% {
+        transform: translateY(3px);
+    }
+    100% {
+        transform: translateY(5px);
+    }
+}
+
+
+/*-------------------------------------------------------------------------------------
+----------------------------------------------------------------
+---------------------------------------------------------*/
+
+
+
+/*------------------------------------------------------------------------------------
+------------------------------------------------------------------
+-----------------------------------------------------------------
+*/
+.text{
+    font-size: 20px;
+    width:80%;
+    margin:30px;
+}
+.contols button {
+    font-size:20px;
+    margin-left:30px;
+    
+}
+.godinamic p a{
+    text-decoration: none;
+  display: inline-block;
+  color: white;
+  padding: 20px 30px;
+  margin: 10px 20px;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background-image: linear-gradient(to right, #9EEFE1 0%, #4830F0 51%, #9EEFE1 100%);
+  background-size: 200% auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+  transition: .5s;
+}
+.godinamic p a:hover{
+ 
+  background-position: right center;
+}
+
+.gradient-button {
+  text-decoration: none;
+  display: inline-block;
+  color: white;
+  padding: 20px 30px;
+  margin: 10px 20px;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background-image: linear-gradient(to right, #9EEFE1 0%, #4830F0 51%, #9EEFE1 100%);
+  background-size: 200% auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+  transition: .5s;
+}
+.gradient-button:hover {
+  background-position: right center;
+}
+
+.floating-button {
+  text-decoration: none;
+  display: inline-block;
+  width: 140px;
+  height: 45px;
+  line-height: 45px;
+  border-radius: 45px;
+  margin: 10px 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 3px;
+  font-weight: 600;
+  color: #524f4e;
+  background: white;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, .1);
+  transition: .3s;
+}
+.floating-button:hover {
+  background: #2EE59D;
+  box-shadow: 0 15px 20px rgba(46, 229, 157, .4);
+  color: white;
+  transform: translateY(-7px);
+}
+
+
+
+.button-wrapper {
+   max-width: 400px;
+   margin: 50px auto;
+   text-align: center;
+   overflow: hidden;
+}
+
+.arrow-btn {
+   position: relative;
+   display: inline-block;
+   padding: 15px 30px;
+   text-decoration: none;
+   color: #2fc989;
+   border: 4px solid #2fc989;
+   font-size: 14px;
+   text-transform: uppercase;
+   letter-spacing: .4em;
+   transition: .2s;
+   transition-delay: .1s;
+}
+.arrow-btn:hover {
+   color: white;
+   padding: 15px 35px;
+}
+.arrow-btn span {
+   position: absolute;
+   top: -2px;
+   left: -2px;
+   right: -2px;
+   bottom: -2px;
+   z-index: -1;
+   overflow: hidden;
+   transition: .35s cubic-bezier(.215, .61, .215, 1);
+}
+.arrow-btn span:before {
+   content: "";
+   position: absolute;
+   top: -5%;
+   left: -210%;
+   width: 200%;
+   height: 108%;
+   background: #2fc989;
+   transform: skew(-15deg, 0);
+   transition: .5s;
+}
+.arrow-btn:after {
+   content: "";
+   position: absolute;
+   z-index: -1;
+   top: 50%;
+   left: -1000%;
+   height: 2px;
+   margin-top: -1px;
+   width: 400%;
+   background: #2fc989;
+   transition: .5s;
+}
+.arrow-btn:hover:after {
+   width: 140%;
+   left: -20%;
+}
+.arrow-btn:hover span:before {
+   left: -25%;
+}
+.alert {
+  padding: 15px;
+  border: 1px solid #d6e9c6;
+  border-radius: 4px;
+  color: #3c763d;
+  background-color: #dff0d8;
+}

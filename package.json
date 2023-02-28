@@ -1,0 +1,36 @@
+{
+  "name": "testkir",
+  "version": "1.0.0",
+  "description": "testforexpress",
+  "main": "app.js",
+  "dependencies": {
+    "@popperjs/core": "^2.9.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "bootstrap": "^5.0.1",
+    "bootstrap5": "^1.1.2",
+    "chalk": "^4.1.0",
+    "colors": "^1.4.0",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^5.2.1",
+    "jquery": "^3.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
+    "mongoose": "^5.11.18",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.0",
+    "nodemailer": "^6.9.1",
+    "nodemon": "^2.0.6",
+    "pdfjs": "^2.4.3",
+    "vue": "^3.2.23",
+    "vuejs": "^3.0.1"
+  },
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "author": "Kir",
+  "license": "ISC",
+  "devDependencies": {}
+}
