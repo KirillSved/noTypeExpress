@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(router); // инициализирую подключeние обработчика  запросов todos методом инциализации новых middleware(?)
 //bodyParser.urlencoded({extended:true})
 app.use("/login", require("./routers/auth.js"))
+app.use("/fileEdit", require("./routers/fileEdit.js"))
 app.use("/privacy", require("./routers/privacy.js"))
 app.use(requestTime,logger)
 // app.use(function (req, res, next) {
