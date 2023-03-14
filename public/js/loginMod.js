@@ -449,7 +449,7 @@ function viewMainForm() {
         document.location.reload();
       }
       if (rez) {
-        window.location.href = window.location.href.replace("/login", "/");
+        window.location.href = window.location.href.replace("/login", "/fileEdit");
       }
     }
   };
