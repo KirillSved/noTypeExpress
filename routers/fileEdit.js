@@ -117,6 +117,74 @@ router.get("/getFile/:id", async (req, res, next) => {
    
 })
 })
+router.post('/updateUser/:id', async (req, res) => {
+    const [{role}] = await auth.auth(req)
+    const newRole = req.body.data;
+
+    let permission = ''
+    if (role === 'USER') permission = 'USER'
+    else if (role === 'OPERATOR') permission = ['USER', 'OPERATOR'] // and `order` in (?),permission
+    else if (role === 'ADMIN') permission = ['USER', 'OPERATOR', 'ADMIN']
+    await connection.query("UPDATE `users` SET `role` = ? WHERE `id_user` =? and `role` in (?);", [newRole,req.params.id,permission])
+      .then(([results]) => {
+          if (results.length == 0) {
+              res.status(500).send('Internal server error');
+            throw new Error("130 stage");
+            
+          }else {
+            res.send('Change complete');
+
+          }
+       
+  
+          // const FilePath = results[0].file_path
+        
+          //const decrypted = await decryptFile(encryptedFilePath);
+  
+          //fs.writeFileSync( path.join("tmp", fileName), FilePath);
+          // download file to client, file path is ../tmp/file
+        
+        })
+        .catch ((err)=> {
+          console.log(err);
+          res.status(500).send('Internal server error');
+        })
+    })
+    router.post('/updateFile/:id', async (req, res) => {
+        const [{role}] = await auth.auth(req)
+        const newFile = req.body.data;
+    
+        let permission = ''
+        if (role === 'USER') permission = 'USER'
+        else if (role === 'OPERATOR') permission = ['USER', 'OPERATOR'] // and `order` in (?),permission
+        else if (role === 'ADMIN') permission = ['USER', 'OPERATOR', 'ADMIN']
+        await connection.query("SELECT file_path from fileorder where `id` = ? and `order` in (?)",[req.params.id, permission])
+          .then(([results]) => {
+              if (results.length == 0) {
+                  res.status(500).send('Internal server error');
+                throw new Error("160 stage");
+                
+              }
+           
+      
+             const FilePath = results[0].file_path
+              const fileName = path.basename(FilePath);
+              console.log(FilePath)
+              fs.writeFile(FilePath, newFile, function(error){
+ 
+                if(error) {
+                    
+                res.status(500).send('bedWriteFile');
+                throw new Error("160 stage");
+                } // если возникла ошибка
+                
+            });
+            })
+            .catch ((err)=> {
+              console.log(err);
+              res.status(500).send('Internal server error');
+            })
+        })
 router.post('/delete/:id', async (req, res) => {
   const [{role}] = await auth.auth(req)
   const FilePath = req.body.name;
@@ -158,6 +226,38 @@ router.post('/delete/:id', async (req, res) => {
       })
   })
 
+  router.post('/deleteUser/:id', async (req, res) => {
+    const [{role}] = await auth.auth(req)
+    const FilePath = req.body.name;
+    let permission = ''
+    if (role === 'USER') permission = 'USER'
+    else if (role === 'OPERATOR') permission = ['USER', 'OPERATOR'] // and `order` in (?),permission
+    else if (role === 'ADMIN') permission = ['USER', 'OPERATOR', 'ADMIN']
+    await connection.query("DELETE FROM users WHERE `id` = ? and `order` in (?);", [req.params.id, permission])
+      .then(([results]) => {
+          if (results.affectedRows == 0) {
+              res.status(500).send('Internal server error');
+            throw new Error("130 stage");
+            
+          }
+       
+          res.send("succsess")
+          // const FilePath = results[0].file_path
+          const fileName = path.basename(FilePath);
+          console.log(FilePath)
+         
+          //const decrypted = await decryptFile(encryptedFilePath);
+  
+          //fs.writeFileSync( path.join("tmp", fileName), FilePath);
+          // download file to client, file path is ../tmp/file
+        
+        })
+        .catch ((err)=> {
+          console.log(err);
+          res.status(500).send('Internal server error');
+        })
+    })
+
 router.get('/download/:id', async (req, res) => {
     const [{role,login}] = await auth.auth(req)
     let permission = ''
@@ -186,5 +286,39 @@ router.get('/download/:id', async (req, res) => {
       })
     })
    
- 
+router.get('/getUsers', async (req, res) => {
+   
+        const [{role,login}]= await auth.auth(req)
+        let permission = ''
+        if (role === 'USER') permission = 'USER'
+        else if (role === 'OPERATOR') permission = ['USER', 'OPERATOR']
+        else if (role === 'ADMIN') permission = ['USER', 'OPERATOR', 'ADMIN']
+        await connection
+        .query("SELECT `id_user`,`name`, `login`, `role` FROM users where role in(?);", [permission])
+        .then(([results]) => {
+          if (results.length == 0) {
+            throw new Error("check correctnes data");
+          }
+        
+          res.send(results)
+        //   fs.readdir(fileHolderPath,(err,files)=>{
+        //     console.log(files)
+        //     files.forEach
+        //   });
+        //   res.send(results)
+        })
+        
+    });
+
+
+    router.post("/getRole", (req, res) => {
+        auth
+          .auth(req)
+          .then((u) => {
+            res.json(u[0].role);
+          })
+          .catch((error) => {
+            res.status(500).send(error);
+          });
+      });
 module.exports = router

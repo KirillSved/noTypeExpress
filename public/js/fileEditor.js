@@ -1,5 +1,6 @@
 
 let isAuth = false;
+let isShow = false;
 async function changeAuthView () {
     if (!getCookie('authorization')) {
       console.log("no auth")
@@ -26,11 +27,90 @@ async function changeAuthView () {
     document.location.reload()
   }
   
+  let Grole;
   changeAuthView()
-
+  showForAdmin()
   updateTable()
+  updateUserTable()
+  uploadFile()
+  async function showForAdmin(){
+    await fetchPost('/fileEdit/getRole', {}, true)
+      .then(role => {
+        Grole = role
+        if (role =="ADMIN" || role =="OPERATOR"){
+        isShow = true
+        let crMod = document.getElementById("addNewFile")
+        
+        crMod.classList.remove("visually-hidden")
+        }
+        if (role =="ADMIN"){
+            let selectDfile=document.getElementById("fileorder")
+            let optionC = `<option value="ADMIN">ADMIN</option>`
+            selectDfile.innerHTML+=optionC
+            }else{
+        let UserListC = document.getElementById("UserListC")
+        UserListC.classList.add("visually-hidden")
+            }
+     
+      })
+      .catch(_ => {
+        isShow = false
+        //console.log(data.role)
+      })
 
-  function createModal (data,name){
+    
+  }
+  function createUserModal (id,name){
+    let modalCon = document.getElementById("UserEditdiv")
+    let modal_content = document.createElement("div")
+    modal_content.onclick = function (event) {
+      event.preventDefault();
+    };
+    // modalCon = ``
+    modalCon.innerHTML =``
+    modal_content.innerHTML =`
+    <h3 class="ms-1">Изменить возможности пользователя </h3>
+    <form class="row gy-2 gx-4 align-items-center" id="formEl">
+        <div class="col-auto">
+            <label class="visually-hidden" for="autoSizingInputGroup">FileName</label>
+            <div class="input-group">
+              <div class="input-group-text">${name}</div>
+             
+            </div>
+        </div>
+    
+        <div class="col-auto">
+          <label class="visually-hidden" for="autoSizingSelect">Preference</label>
+          <select class="form-select" id="userorder">
+            <option selected value="USER">USER</option>
+            <option value="OPERATOR">OPERATOR</option>
+            
+          </select>
+        </div>
+       
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary" id="updateUserbtn">Submit</button>
+        </div>
+      </form>
+</div>`
+modalCon.append(modal_content)
+let selectUser=document.getElementById("userorder")
+if (Grole =="ADMIN"){
+    let optionC = `<option value="ADMIN">ADMIN</option>`
+    selectUser.innerHTML+=optionC
+    }else{
+
+
+    }
+let updateUserbtn =document.getElementById('updateUserbtn')
+updateUserbtn.onclick = async (event) =>{
+
+   
+
+            updateUser(id,selectUser.value)
+}
+  }
+  function createModal (data,name,id){
     let modalCon = document.getElementById("modCon")
     let modal_content = document.createElement("div")
     modal_content.onclick = function (event) {
@@ -38,7 +118,14 @@ async function changeAuthView () {
     };
     modalCon.innerHTML = ``;
     localStorage.removeItem("wysiwyg");
-      
+    let buttonStr;
+    if(Grole=="ADMIN" || Grole == "OPERATOR"){
+    buttonStr = ` <button data-func="clear" type="button">clear</button>
+    <button data-func="save" type="button">save</button>`
+    }else{
+        buttonStr = ``
+    }
+    
     modal_content.innerHTML =`
 
     <div class="newPost">
@@ -90,8 +177,7 @@ async function changeAuthView () {
         <div class="editor" contenteditable id="databox"></div>
         <div class="buttons">
           <!--<button type="button">save draft</button>-->
-          <button data-func="clear" type="button">clear</button>
-          <button data-func="save" type="button">save</button>
+         ${buttonStr}
         </div>
       </div>`
       modalCon.append(modal_content)
@@ -111,11 +197,30 @@ async function changeAuthView () {
          modal_content.append(img);
         //$('.editor').appendChild(img)
         document.querySelector('.editor').append(img)
-       
+        document.querySelector('.buttons').classList.add("visually-hidden")
         localStorage.removeItem("wysiwyg");
 
     }else{
         localStorage.setItem("wysiwyg", data.toString());
+        $('.editor').keypress(function(){
+            $(this).find('.saved').detach();
+          });
+            $('.editor').text(localStorage.getItem("wysiwyg")) ;
+            
+            $('button[data-func="save"]').click(function(){
+              $content = $('.editor').html();
+              localStorage.setItem("wysiwyg", $content);
+              $('.editor').append('<span class="saved"><i class="fa fa-check"></i></span>').fadeIn(function(){
+                $(this).find('.saved').fadeOut(500);
+              });
+              updateFile(id,$content)
+            });
+            
+            $('button[data-func="clear"]').click(function(){
+              $('.editor').html('');
+              localStorage.removeItem("wysiwyg");
+            });
+            
     }
 
     //   localStorage.setItem("wysiwyg", data.toString());
@@ -128,29 +233,12 @@ async function changeAuthView () {
         document.execCommand( $(this).data('func'), false, $value);
       });
     
-      if(typeof(Storage) !== "undefined" && localStorage.getItem("wysiwyg") ) {
+      //if(typeof(Storage) !== "undefined" && localStorage.getItem("wysiwyg") ) {
     
-      $('.editor').keypress(function(){
-        $(this).find('.saved').detach();
-      });
-        $('.editor').text(localStorage.getItem("wysiwyg")) ;
-        
-        $('button[data-func="save"]').click(function(){
-          $content = $('.editor').html();
-          localStorage.setItem("wysiwyg", $content);
-          $('.editor').append('<span class="saved"><i class="fa fa-check"></i></span>').fadeIn(function(){
-            $(this).find('.saved').fadeOut(500);
-          });
-        });
-        
-        $('button[data-func="clear"]').click(function(){
-          $('.editor').html('');
-          localStorage.removeItem("wysiwyg");
-        });
-        
+    
         
       } 
-  }
+  //} 
   
   function addEditUModal (id,name){
     fetch(`/fileEdit/getFile/${id}`)
@@ -164,14 +252,80 @@ async function changeAuthView () {
             return response.text()
           }
         }).then(data => {
-          createModal(data,name);
+          createModal(data,name,id);
         }).catch(err => {
       console.log(err);
     });
 
   }
-
-   function updateTable(role) {
+  function updateUserTable() {
+    fetch("/fileEdit/getUsers").then(response => {
+      return response.json();
+    }).then(data => {
+      users = data;
+      let table = document.getElementById("userTable");
+      table.classList = "table table-fixed bg-light";
+      table.innerHTML = "";
+  
+      // create table header
+      let headerRow = document.createElement("tr");
+      let header1 = document.createElement("th");
+      header1.innerText = "Username";
+    //   let header2 = document.createElement("th");
+    //   header2.innerText = "Password Type";
+      let header3 = document.createElement("th");
+      header3.innerText = "Role";
+      let header4 = document.createElement("th");
+      header4.innerText = "Edit";
+      let header5 = document.createElement("th");
+      header5.innerText = "Delete";
+      headerRow.appendChild(header1);
+      //headerRow.appendChild(header2);
+      headerRow.appendChild(header3);
+      headerRow.appendChild(header4);
+      headerRow.appendChild(header5);
+      table.appendChild(headerRow);
+  
+      // create table rows
+      for (let i = 0; i < users.length; i++) {
+        let user = users[i];
+        let row = document.createElement("tr");
+        let cell1 = document.createElement("td");
+        cell1.innerText = user.login;
+        let cell2 = document.createElement("td");
+        //cell2.innerText = user.password_type;
+        let cell3 = document.createElement("td");
+        cell3.innerText = user.role;
+        let cell4 = document.createElement("td");
+        let editButton = document.createElement("button");
+        editButton.innerText = "Edit";
+        editButton.onclick = function () {
+             createUserModal(user.id_user,user.login);
+        };
+        cell4.appendChild(editButton);
+        let cell5 = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.innerText = "Delete";
+        deleteButton.onclick = function () {
+          deleteUser(user.id);
+        };
+        cell5.appendChild(deleteButton);
+        row.appendChild(cell1);
+        //row.appendChild(cell2);
+        row.appendChild(cell3);
+        if(user.role != "ADMIN"){
+        row.appendChild(cell4);
+        row.appendChild(cell5);
+    }
+        table.appendChild(row);
+      }
+  
+    }).catch(err => {
+      console.log(err);
+    });
+  }
+   function updateTable() {
+    //changeAuthView()
     fetch('/fileEdit/getFiles')
     .then(response => {
        // response = Object.assign({}, response); // {0:"a", 1:"b", 2:"c"}
@@ -206,7 +360,9 @@ async function changeAuthView () {
       //headerRow.appendChild(header2);
       headerRow.appendChild(header3);
       headerRow.appendChild(header4);
-      headerRow.appendChild(header5);
+      if(Grole=="ADMIN"||Grole=="OPERATOR"){
+        headerRow.appendChild(header5);
+      }
       headerRow.appendChild(header6);
       table.appendChild(headerRow);
   
@@ -244,14 +400,17 @@ async function changeAuthView () {
         let dowloadButton = document.createElement("button");
         dowloadButton.innerText = "download";
         dowloadButton.setAttribute("onclick",`window.location.href = '/fileEdit/download/${file.id}'`)
-       
-        cell5.appendChild(deleteButton);
+        
         cell6.appendChild(dowloadButton);
         row.appendChild(cell1);
         //row.appendChild(cell2);
         row.appendChild(cell3);
         row.appendChild(cell4);
-        row.appendChild(cell5);
+        if(Grole=="ADMIN"||Grole=="OPERATOR"){
+            cell5.appendChild(deleteButton);
+            row.appendChild(cell5);
+
+        }
         row.appendChild(cell6);
         table.appendChild(row);
       }
@@ -260,7 +419,7 @@ async function changeAuthView () {
       console.log(err);
     });
   }
-  uploadFile()
+ 
   async function uploadFile(){
     // document.body.onsubmit((event)=>{
     //     event.preventDefault();
@@ -318,6 +477,62 @@ async function changeAuthView () {
       const rez = await fetchPost(
         `fileEdit/delete/${id}`,
         { name },
+        true
+      )
+    .then(response => {
+        console.log(response)
+        return response
+        }).then(data => {
+             updateTable() 
+            makeToast({
+                header: "Успіх",
+                body: data,
+                type: "success",
+                data_delay: 7000,
+              });
+        }).catch(err => {
+            makeToast({
+                header: "Denaid",
+                body: err.message,
+                type: "danger",
+                data_delay: 7000,
+              });
+      console.log(err);
+        })
+    
+  }
+  async function updateFile(id,data){
+    const rez = await fetchPost(
+        `fileEdit/updateFile/${id}`,
+        { data },
+        true
+      )
+    .then(response => {
+        console.log(response)
+        return response
+        }).then(data => {
+             updateTable() 
+            makeToast({
+                header: "Успіх",
+                body: data,
+                type: "success",
+                data_delay: 7000,
+              });
+        }).catch(err => {
+            makeToast({
+                header: "Denaid",
+                body: err.message,
+                type: "danger",
+                data_delay: 7000,
+              });
+      console.log(err);
+        })
+    
+  }
+  async function updateUser(id,data){
+    const rez = await fetchPost(
+        `fileEdit/updateUser/${id}`,
+        { data },
         true
       )
     .then(response => {
