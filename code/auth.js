@@ -8,7 +8,7 @@ module.exports.getToken = function getToken(passhash, email, password) {
     bcrypt.compare(password, passhash, function (err, res) {
       if (res) {
         let token = jwt.sign({ username: email },
-          process.env.SITE_JSONWEBTOKENKEY, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' } // expires in 24 hours default        
+          process.env.SITE_JSONWEBTOKENKEY, { expiresIn: process.env.JWT_EXPIRES_IN || '4h' } // expires in 24 hours default        
         );
         resolve(token);
       } else reject("Логін і пароль не збігаються");

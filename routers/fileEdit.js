@@ -228,12 +228,12 @@ router.post('/delete/:id', async (req, res) => {
 
   router.post('/deleteUser/:id', async (req, res) => {
     const [{role}] = await auth.auth(req)
-    const FilePath = req.body.name;
+    const deleteLogin = req.body.login;
     let permission = ''
     if (role === 'USER') permission = 'USER'
     else if (role === 'OPERATOR') permission = ['USER', 'OPERATOR'] // and `order` in (?),permission
     else if (role === 'ADMIN') permission = ['USER', 'OPERATOR', 'ADMIN']
-    await connection.query("DELETE FROM users WHERE `id` = ? and `order` in (?);", [req.params.id, permission])
+    await connection.query("DELETE FROM users WHERE `id_user` = ? and `role` in (?);", [req.params.id, permission])
       .then(([results]) => {
           if (results.affectedRows == 0) {
               res.status(500).send('Internal server error');
@@ -241,10 +241,10 @@ router.post('/delete/:id', async (req, res) => {
             
           }
        
-          res.send("succsess")
+          res.send(`User was deleted ${deleteLogin}`)
           // const FilePath = results[0].file_path
-          const fileName = path.basename(FilePath);
-          console.log(FilePath)
+          // const fileName = path.basename(FilePath);
+          // console.log(FilePath)
          
           //const decrypted = await decryptFile(encryptedFilePath);
   

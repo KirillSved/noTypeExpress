@@ -488,12 +488,14 @@ function viewMainForm() {
               { login, password, userName },
               true
             );
+            if(rez){
             makeToast({
               header: "Успіх",
               body: rez,
               type: "success",
               data_delay: 7000,
-            });
+            })
+          viewMainForm()};
           } else {
             makeToast({
               header: "Denaid",
@@ -505,7 +507,7 @@ function viewMainForm() {
         } else {
           makeToast({
             header: "Denaid",
-            body: "Empy field login",
+            body: "not confirm password",
             type: "danger",
             data_delay: 7000,
           });

@@ -111,6 +111,11 @@ updateUserbtn.onclick = async (event) =>{
 }
   }
   function createModal (data,name,id){
+
+        var buttonId = "one"//$(this).attr('id');
+        $('#modal-container').removeAttr('class').addClass(buttonId);
+        $('#modal-container').addClass('modal-active');
+     
     let modalCon = document.getElementById("modCon")
     let modal_content = document.createElement("div")
     modal_content.onclick = function (event) {
@@ -176,7 +181,7 @@ updateUserbtn.onclick = async (event) =>{
         </div>
         <div class="editor" contenteditable id="databox"></div>
         <div class="buttons">
-          <!--<button type="button">save draft</button>-->
+          <button data-func="hide" type="button">save draft</button>
          ${buttonStr}
         </div>
       </div>`
@@ -201,6 +206,7 @@ updateUserbtn.onclick = async (event) =>{
         localStorage.removeItem("wysiwyg");
 
     }else{
+
         localStorage.setItem("wysiwyg", data.toString());
         $('.editor').keypress(function(){
             $(this).find('.saved').detach();
@@ -222,6 +228,26 @@ updateUserbtn.onclick = async (event) =>{
             });
             
     }
+
+  let i = 0;
+  $('.modal').click(function(event){
+    event.preventDefault()
+    i=1
+  })
+
+  $('.modal-background').click(function(){
+    if(i==0){
+    $('#modal-container').addClass('out');
+    $('#modal-container').removeClass('modal-active');
+    }else{
+        i = 0
+    }
+  })
+  
+  $('button[data-func="hide"]').click(function(){
+    $('#modal-container').addClass('out');
+    $('#modal-container').removeClass('modal-active');
+  });
 
     //   localStorage.setItem("wysiwyg", data.toString());
       $('.newPost button[data-func]').click(function(){
