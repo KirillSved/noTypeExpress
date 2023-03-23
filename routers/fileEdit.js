@@ -26,19 +26,23 @@ router.get("/getFiles", async (req, res, next) => {
     .query("SELECT `id`,`file_path`,`order` FROM fileorder where `order` in (?)", [permission])
     .then(([results]) => {
       if (results.length == 0) {
+        res.status(500).send('check correctnes data');
         throw new Error("check correctnes data");
       }
-      let dataCon = [];
-      results.forEach(el => {
-        console.log(el)
+      // let dataCon = [];
+      // results.forEach(el => {
+      //   console.log(el)
        
-      });
+      // });
       res.send(results)
     //   fs.readdir(fileHolderPath,(err,files)=>{
     //     console.log(files)
     //     files.forEach
     //   });
     //   res.send(results)
+    }).catch((err)=>{
+      res.status(500).send('check correctnes data');
+      throw new Error("check correctnes data");
     })
     
 })
@@ -78,10 +82,12 @@ router.post("/upload", async(req, res, next) => {
       
        
 }).catch((err)=>{
-    if (error.code == "ER_DUP_ENTRY") {
-        res.status(400).send("file olready exist");
-      } else res.status(500).send(error.message);
-    });
+  if (err.code == "ER_DUP_ENTRY") {
+      
+    res.status(400).send("file olready exist");
+  } else res.status(500).send(err.message);
+  throw new Error(err.message);
+});
     });
 })
 

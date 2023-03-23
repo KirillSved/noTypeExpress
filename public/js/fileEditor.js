@@ -95,7 +95,7 @@ async function changeAuthView () {
 </div>`
 modalCon.append(modal_content)
 let selectUser=document.getElementById("userorder")
-if (Grole =="ADMIN"){
+if (Grole =="SUPERADMIN"){
     let optionC = `<option value="ADMIN">ADMIN</option>`
     selectUser.innerHTML+=optionC
     }else{
@@ -181,7 +181,7 @@ updateUserbtn.onclick = async (event) =>{
         </div>
         <div class="editor" contenteditable id="databox"></div>
         <div class="buttons">
-          <button data-func="hide" type="button">save draft</button>
+          <button data-func="hide" type="button">Ok</button>
          ${buttonStr}
         </div>
       </div>`
@@ -206,7 +206,14 @@ updateUserbtn.onclick = async (event) =>{
         localStorage.removeItem("wysiwyg");
 
     }else{
-
+        $('.newPost button[data-func]').click(function(){
+            document.execCommand( $(this).data('func'), false 	);
+          });
+        
+          $('.newPost select[data-func]').change(function(){
+            var $value = $(this).find(':selected').val();
+            document.execCommand( $(this).data('func'), false, $value);
+          });
         localStorage.setItem("wysiwyg", data.toString());
         $('.editor').keypress(function(){
             $(this).find('.saved').detach();
@@ -214,7 +221,7 @@ updateUserbtn.onclick = async (event) =>{
             $('.editor').text(localStorage.getItem("wysiwyg")) ;
             
             $('button[data-func="save"]').click(function(){
-              $content = $('.editor').html();
+              $content = $('.editor').text();
               localStorage.setItem("wysiwyg", $content);
               $('.editor').append('<span class="saved"><i class="fa fa-check"></i></span>').fadeIn(function(){
                 $(this).find('.saved').fadeOut(500);
@@ -333,7 +340,7 @@ updateUserbtn.onclick = async (event) =>{
         let deleteButton = document.createElement("button");
         deleteButton.innerText = "Delete";
         deleteButton.onclick = function () {
-          deleteUser(user.id);
+          deleteUser(user.id_user,user.login);
         };
         cell5.appendChild(deleteButton);
         row.appendChild(cell1);
@@ -446,6 +453,144 @@ updateUserbtn.onclick = async (event) =>{
     });
   }
  
+  
+  async function deleteUser(id,login){ 
+    
+    const rez = await fetchPost(
+        `fileEdit/deleteUser/${id}`,
+        { login },
+        true
+      )
+    .then(response => {
+        console.log(response)
+        return response
+        }).then(data => {
+             updateUserTable() 
+            makeToast({
+                header: "Успіх",
+                body: data,
+                type: "success",
+                data_delay: 7000,
+              });
+        }).catch(err => {
+            makeToast({
+                header: "Denaid",
+                body: err.message,
+                type: "danger",
+                data_delay: 7000,
+              });
+      console.log(err);
+        })
+
+
+  }
+
+  async function addUser(){
+   let  regCrBtn = document.createElement("regCrBtn")
+    regCrBtn.addEventListener("click", () => {
+        
+        let regForm = document.createElement("form")
+        regForm.classList =`row g-3`
+        regForm.innerHTML=` <div class="col-md-6">
+        <label for="inputEmail4" class="form-label">Email</label>
+        <input type="email" class="form-control" id="inputEmail4">
+      </div>
+      <div class="col-md-6">
+        <label for="inputPassword4" class="form-label">Password</label>
+        <input type="password" class="form-control" id="inputPassword4">
+      </div>
+      <div class="col-12">
+        <label for="inputAddress" class="form-label">Address</label>
+        <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+      </div>
+      <div class="col-12">
+        <label for="inputAddress2" class="form-label">Address 2</label>
+        <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+      </div>
+      <div class="col-md-6">
+        <label for="inputCity" class="form-label">City</label>
+        <input type="text" class="form-control" id="inputCity">
+      </div>
+      <div class="col-md-4">
+        <label for="inputState" class="form-label">State</label>
+        <select id="inputState" class="form-select">
+          <option selected>Choose...</option>
+          <option>...</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="inputZip" class="form-label">Zip</label>
+        <input type="text" class="form-control" id="inputZip">
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="gridCheck">
+          <label class="form-check-label" for="gridCheck">
+            Check me out
+          </label>
+        </div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary" id="registerbtn">Create</button>
+      </div>`
+        let userEdd = document.getElementById("UserEditdiv");
+        userEdd.innerHTML = ``;
+        userEdd.append(regForm);
+    
+       
+        const registerbtn = document.getElementById("registerbtn");
+        if (registerbtn) {
+          registerbtn.onclick = async (event) => {
+            event.preventDefault();
+            const login = document.getElementById("crlogin").value;
+            const password = document.getElementById("crpwd").value;
+            const confpwd = document.getElementById("confpwd").value;
+            const userfirstName = document.getElementById("userName").value;
+            const userSername = document.getElementById("userSername").value;
+            const password_type = document.getElementById("password_type").value;
+            let userName = `${userfirstName} ${userSername}`;
+    
+            // let numRuleRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$")
+            // let spRegex =new RegExp("^(?=.*[A-Za-z])(?.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d\$!%*#?&]{8,}\$")
+    
+            if (login != "" && password != "" && password == confpwd) {
+              if (
+                (password_type == "strong" && checkPassType(password)) ||
+                password_type == "simple"
+              ) {
+                const rez = await fetchPost(
+                  "login/register",
+                  { login, password, userName },
+                  true
+                );
+                makeToast({
+                  header: "Успіх",
+                  body: rez,
+                  type: "success",
+                  data_delay: 7000,
+                });
+              } else {
+                makeToast({
+                  header: "Denaid",
+                  body: `password does not matches password type ${password_type}`,
+                  type: "danger",
+                  data_delay: 7000,
+                });
+              }
+            } else {
+              makeToast({
+                header: "Denaid",
+                body: "Empy field login",
+                type: "danger",
+                data_delay: 7000,
+              });
+            }
+          };
+        }
+      });
+
+  }
+
   async function uploadFile(){
     // document.body.onsubmit((event)=>{
     //     event.preventDefault();
@@ -469,13 +614,15 @@ updateUserbtn.onclick = async (event) =>{
 
     if (response.ok) {
       // If the response is ok, close the modal window
+      const bbody = await response.text();
       makeToast({
         header: "Успіх",
-        body: response.text(),
+        body: bbody,
         type: "success",
         data_delay: 7000,
       });
-      document.location.reload()
+      updateTable()
+      fileInput.value = ``;
     } else {
       // If the response is not ok, show an error message
       const error = await response.text();
@@ -565,7 +712,7 @@ updateUserbtn.onclick = async (event) =>{
         console.log(response)
         return response
         }).then(data => {
-             updateTable() 
+             updateUserTable() 
             makeToast({
                 header: "Успіх",
                 body: data,
