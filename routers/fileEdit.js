@@ -44,6 +44,79 @@ async function getUserFilePermissions(fileId, user_id) {
       });
   });
 }
+
+async function GetManFileFromDatabase(user, file_id) {
+  const mode = await getACMode();
+  const manPermissions = await getAllManPermissionsForUser(user);
+  //let userPer = await getAllPermissionsDACForUserid(userid);
+  //const macPermissions = await getAllPermissionsMACForUser(user);
+
+  return new Promise(async (resolve, reject) => {
+    let query = "";
+    let params =file_id ;
+    if (user.role !== "ADMIN") {
+      // if (user.role === 'ADMIN') query = 'Select `id`, file_path from fileorder';
+      // else {
+      query =
+        "Select id,file_path,`order`, access_time_from, access_time_to from fileorder where id in(?);";
+
+    
+      // }
+    } else {
+      query =
+      "Select id,file_path,`order`, access_time_from, access_time_to from fileorder where id in(?);";
+    }
+    await connection
+      .query(query, file_id)
+      .then(([results]) => {
+
+        if (user.role !== "ADMIN" && user.role!=="SUPERADMIN")
+          results = results.filter((file) => {
+            const permission = manPermissions.find(
+              (permission) =>
+                permission.file_id === file.id &&
+                permission.user_id === user.id_user
+            );
+            if (!permission) return false;
+
+            return checkAccessTime(permission);
+          });
+
+        results = results.map((file) => {
+          // find permissions for file
+          let permission =
+            user.role === "ADMIN" || user.role =="SUPERADMIN"
+              ? returnFullPermissionDAC()
+              : manPermissions.find(
+                  (permission) =>
+                    permission.file_id === file.id &&
+                    permission.user_id === user.id_user
+                );
+          permission.symbolic = transformPermissionIntoSymbolic(permission);
+
+          // repack results for client
+          return {
+            id: file.id,
+            file_path: file.file_path, //path.basename(file.file_path),
+            access_time_from:file.access_time_from,
+            access_time_to:file.access_time_to,
+            permission: permission,
+          };
+        });
+      
+        const transformedResults = {
+          files: results,
+          userFiles: "bres",
+        };
+        resolve(transformedResults);
+      })
+      .catch((err) => {
+        console.log(err);
+        reject(err);
+        return;
+      });
+  });
+}
 async function GetFileListFromDatabase(user, userid) {
   const mode = await getACMode();
   const dacPermissions = await getAllPermissionsDACForUser(user);
@@ -53,7 +126,7 @@ async function GetFileListFromDatabase(user, userid) {
   return new Promise(async (resolve, reject) => {
     let query = "";
     let params = [];
-    if (user.role !== "ADMIN") {
+    if (user.role !== "ADMIN" && user.role !== "SUPERADMIN") {
       // if (user.role === 'ADMIN') query = 'Select `id`, file_path from fileorder';
       // else {
       query =
@@ -78,7 +151,7 @@ async function GetFileListFromDatabase(user, userid) {
           return checkAccessTime(permission);
         });
 
-        if (user.role !== "ADMIN")
+        if (user.role !== "ADMIN" && user.role !== "SUPERADMIN")
           results = results.filter((file) => {
             const permission = dacPermissions.find(
               (permission) =>
@@ -93,7 +166,7 @@ async function GetFileListFromDatabase(user, userid) {
         results = results.map((file) => {
           // find permissions for file
           let permission =
-            user.role === "ADMIN"
+            user.role == "ADMIN" || user.role == "SUPERADMIN"
               ? returnFullPermissionDAC()
               : dacPermissions.find(
                   (permission) =>
@@ -258,6 +331,26 @@ async function getACMode() {
 async function getAllPermissionsDACForUser(user) {
   return await connection
     .query("SELECT * FROM digorder where user_id = ?", [user.id_user])
+    .then(([results]) => {
+      return results;
+    })
+    .catch((err) => {
+      console.log(err);
+
+      return;
+    });
+}
+async function getAllManPermissionsForUser(user) {
+  let permission = "";
+  let role = user.role;
+  if (role === "USER") permission = "USER";
+  else if (role === "OPERATOR")
+    permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
+  else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
+  return await connection
+    .query("SELECT * FROM fileorder where  `order` in (?)", [permission])
     .then(([results]) => {
       return results;
     })
@@ -516,6 +609,23 @@ router.post("/getAllFilesToSet", async (req, res, next) => {
       throw new Error("check correctnes data");
     });
 });
+
+router.post("/getFilePer", async (req, res, next) => {
+  // const { login, password } = req.body;
+  const { file_id, user_id } = req.body;
+  var userrr = await auth.auth(req).then((u) => {
+    return u[0];
+  });
+ GetManFileFromDatabase(userrr,file_id) //,req.params.id)
+    .then((resFor) => {
+      res.send(resFor);
+      console.log(resFor);
+    })
+    .catch((err) => {
+      res.status(500).send("check correctnes data");
+      throw new Error("check correctnes data");
+    });
+});
 router.get("/getUserFiles/:id", async (req, res, next) => {
   // const { login, password } = req.body;
   var userrr = await auth.auth(req).then((u) => {
@@ -566,6 +676,7 @@ router.post("/setOrder/:id", async (req, res) => {
   else if (role === "OPERATOR")
     permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
 
   await SetFilePermission(id, owner, id_user, newPermissions)
     .then((resFor) => {
@@ -585,9 +696,10 @@ router.get("/getFiles", async (req, res, next) => {
   if (role === "USER") permission = "USER";
   else if (role === "OPERATOR") permission = ["USER", "OPERATOR"];
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
   await connection
     .query(
-      "SELECT `id`,`file_path`,`order` FROM fileorder where `order` in (?)",
+      "SELECT `id`,`file_path`,`order`,`access_time_from`,`access_time_to` FROM fileorder where `order` in (?)",
       [permission]
     )
     .then(([results]) => {
@@ -595,6 +707,12 @@ router.get("/getFiles", async (req, res, next) => {
         res.status(500).send("check correctnes data");
         throw new Error("check correctnes data");
       }
+      if(role!="ADMIN" && role!="SUPERADMIN"){
+      results = results.filter((file) => {
+        return checkAccessTime(file);
+      });
+    
+    }
       // let dataCon = [];
       // results.forEach(el => {
       //   console.log(el)
@@ -687,6 +805,10 @@ router.get("/getFile/:id", async (req, res, next) => {
         contentType = "text/plain";
       } else if (extension === ".png") {
         contentType = "image/png";
+      }else if (extension === ".jpg") {
+        contentType = "image/jpg";
+      }else if (extension === ".exe") {
+        contentType = "excute/file";
       }
 
       res.setHeader("content-type", contentType);
@@ -704,10 +826,48 @@ router.post("/updateUser/:id", async (req, res) => {
   else if (role === "OPERATOR")
     permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
   await connection
     .query(
       "UPDATE `users` SET `role` = ? WHERE `id_user` =? and `role` in (?);",
       [newRole, req.params.id, permission]
+    )
+    .then(([results]) => {
+      if (results.length == 0) {
+        res.status(500).send("Internal server error");
+        throw new Error("130 stage");
+      } else {
+        res.send("Change complete");
+      }
+
+      // const FilePath = results[0].file_path
+
+      //const decrypted = await decryptFile(encryptedFilePath);
+
+      //fs.writeFileSync( path.join("tmp", fileName), FilePath);
+      // download file to client, file path is ../tmp/file
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send("Internal server error");
+    });
+});
+router.post("/updateManFile/:id", async (req, res) => {
+  const [{ role }] = await auth.auth(req);
+  const {id,id_user,data} = req.body;
+
+  let permission = "";
+  if (role === "USER") permission = "USER";
+  else if (role === "OPERATOR")
+    permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
+  else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
+  await connection
+    .query(
+      "UPDATE `fileorder` SET `order` = ?, `access_time_from` = ?, `access_time_to` = ? WHERE `id` =? and `order` in (?);",
+      [data.order,data.access_time_from,data.access_time_to, req.params.id, permission]
     )
     .then(([results]) => {
       if (results.length == 0) {
@@ -738,6 +898,8 @@ router.post("/updateFile/:id", async (req, res) => {
   else if (role === "OPERATOR")
     permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
   await connection
     .query(
       "SELECT file_path from fileorder where `id` = ? and `order` in (?)",
@@ -772,6 +934,8 @@ router.post("/delete/:id", async (req, res) => {
   else if (role === "OPERATOR")
     permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
   await connection
     .query("DELETE FROM fileorder WHERE `id` = ? and `order` in (?);", [
       req.params.id,
@@ -814,6 +978,8 @@ router.post("/deleteUser/:id", async (req, res) => {
   else if (role === "OPERATOR")
     permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
   await connection
     .query("DELETE FROM users WHERE `id_user` = ? and `role` in (?);", [
       req.params.id,
@@ -848,6 +1014,8 @@ router.get("/download/:id", async (req, res) => {
   else if (role === "OPERATOR")
     permission = ["USER", "OPERATOR"]; // and `order` in (?),permission
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
   await connection
     .query(
       "SELECT file_path from fileorder where `id` = ? and `order` in (?)",
@@ -879,6 +1047,8 @@ router.get("/getUsers", async (req, res) => {
   if (role === "USER") permission = "USER";
   else if (role === "OPERATOR") permission = ["USER", "OPERATOR"];
   else if (role === "ADMIN") permission = ["USER", "OPERATOR", "ADMIN"];
+  else if (role === "SUPERADMIN") permission = ["USER", "OPERATOR", "ADMIN","SUPERADMIN"];
+
   await connection
     .query(
       "SELECT `id_user`,`name`, `login`, `role` FROM users where role in(?);",

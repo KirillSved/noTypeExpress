@@ -28,18 +28,34 @@
 
 
       <div class="content">
-        <div class="row align-items-start">
-          <div class="col-auto me-auto m-2">
+        <div class="row align-items-center">
+          <div class="col-auto me-auto ">
             <div class="visually-hidden" id="modcheck"></div>
+          </div>
+          <div class="col-auto me-auto ">
+            <div class="conteiner visually-hidden" id="controlnav" >
+              <nav class="application-nav">
+                <div class="container">
+                  <ul>
+                    <li class=""><a href="" id="fileeditnav"><span class="ion-home"></span><span class="text">FileEditor</span></a></li>
+                    <li class=""><a href="" id="usercrnav"><span class="ion-document-text"></span><span class="text">UserCreate</span></a></li>
+                    <li class=""><a href=""><span class="ion-android-share-alt"></span><span class="text">RoleCreate</span></a></li>
+                    <li class=""><a href=""><span class="ion-person-stalker"></span><span class="text">Users</span></a></li>
+                    <li class=""><a href=""><span class="ion-gear-b"></span><span class="text">Settings</span></a></li>
+                  </ul>
+                </div>
+              </nav>
+            </div>
           </div>
           <div class="col-auto ">
             <div id="exitplace"></div>
           </div>
              
+
           </div>
   </div>
-     
-       
+
+
         <div class="conteiner px-4 p-3 visually-hidden" id="addNewFile" >
             <div class="row">
                 <div class="col">
@@ -87,7 +103,8 @@
         <div class="conteiner px-4 p-3 " >
             <div class="row">
                 <div class="col">
-                    <div class="conteiner">
+                    <div class="conteiner" id="filediv">
+                      
                         <h3 class="ms-1">Список файлов</h3>
                         <table id="fileTable" ></table>
                         </div>

@@ -42,7 +42,7 @@ router.post("/register", async (req, res) => {
   const user = {
     name: req.body.userName || "USER",
     login: req.body.login,
-    role: "User",
+    role: req.body.role || "USER",
     password_hash: bcrypt.hashSync(req.body.password, 10), // 10 - saltRounds
   };
   await connection

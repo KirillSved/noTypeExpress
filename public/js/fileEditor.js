@@ -1,3 +1,4 @@
+
 let isAuth = false;
 let isShow = false;
 async function changeAuthView() {
@@ -113,6 +114,7 @@ async function setFileOrder(id, path, id_user) {
   }
   if (writeOrder.checked == true && writeOrder.value == "write") {
     writeOrder = 1;
+    readOrder = 1
   } else {
     writeOrder = 0;
   }
@@ -162,6 +164,53 @@ async function setFileOrder(id, path, id_user) {
       })
     });
 }
+
+async function setManFileOrder(id, path, id_user) {
+  
+  //[readOrder,writeOrder,executeOrder] = [0,0,0]
+  let access_time_from = document.getElementById("timefrom").value;
+  let access_time_to = document.getElementById("timeto").value;
+  let selectFile = document.getElementById("fileManorder");
+  // if (Grole == "SUPERADMIN") {
+    let optionC = `<option value="ADMIN">ADMIN</option>`;
+  let data ={
+    id,
+    access_time_from,
+    access_time_to,
+    order :selectFile.value
+  }
+ 
+  // fileId, owner, userId, newPerissions
+
+  await fetchPost(
+    `fileEdit/updateManFile/${id}`,
+    { id, id_user, data },
+    true
+  )
+    .then(async (res) => {
+      //todo toast
+      const bbody =  res
+        makeToast({
+          header: "Успіх",
+          body: bbody,
+          type: "success",
+          data_delay: 7000,
+
+        })
+        updateTable()
+      console.log(res);
+    })
+    .catch((err) => {
+      makeToast({
+        header: "fail",
+        body: err,
+        type: "danger",
+        data_delay: 7000,
+
+      })
+    });
+}
+
 
 function createPerdigUserModalMod(data, name, user_id, file_id) {
   var buttonId = "one"; //$(this).attr('id');
@@ -365,26 +414,7 @@ function createPerdigUserModalMod(data, name, user_id, file_id) {
   backBtn.innerHTML = `  <div class="newPost"> <div class="buttons">
 <button data-func="hide" type="button">Ok</button></div> </div>`;
   modalCon.appendChild(backBtn);
-  // if (data instanceof Blob){
-
-  //   const img = createImage(URL.createObjectURL(data));
-  //   function createImage(src) {
-  //       const img = document.createElement("img");
-  //       img.style="width: 650px; "
-  //       img.src = src;
-  //       return img;
-  //     }
-  // let databox = document.createElement("div")
-
-  // databox.append(img)
-  // document.getElementById("databox").append(databox)
-  //  modal_content.append(img);
-  //$('.editor').appendChild(img)
-  // document.querySelector('.editor').append(img)
-  // document.querySelector('.buttons').classList.add("visually-hidden")
-  // localStorage.removeItem("wysiwyg");
-
-  // }else{
+  
 
   let i = 0;
   $(".modal").click(function (event) {
@@ -858,6 +888,509 @@ async function addSetDigModal(user_id, name, file_id) {
     });
 }
 
+function createPerUserModal(data, name, file_id, user_id) {
+  var buttonId = "one"; //$(this).attr('id');
+  $("#modal-container").removeAttr("class").addClass(buttonId);
+  $("#modal-container").addClass("modal-active");
+
+  let modalCon = document.getElementById("modCon");
+  $(".modal").attr("style", "padding: 20px");
+  let modal_content = document.createElement("div");
+  modal_content.onclick = function (event) {
+    event.preventDefault();
+  };
+  modalCon.innerHTML = ``;
+
+  // if(Grole=="ADMIN" || Grole == "OPERATOR"){
+  // buttonStr = ` <button data-func="clear" type="button">clear</button>
+  // <button data-func="save" type="button">save</button>`
+  // }else{
+  //   buttonStr = ``
+  // }
+  files = data;
+  userFiles = [];
+ 
+  if (data.files && data.userFiles) {
+    files = data.files;
+    userFiles = data.userFiles; 
+    if(file_id){
+      files = files.filter((file) => {
+       return file.id === file_id      
+    })
+  }
+  }
+
+  let table = document.createElement("table");
+  table.classList = "table table-fixed bg-light";
+  table.innerHTML = "";
+  //if(role=="USER"){
+  // create table header
+  let headerRow = document.createElement("tr");
+  let header1 = document.createElement("th");
+  header1.classList = "col-xs";
+  header1.innerText = "Filename";
+  let header2 = document.createElement("th");
+  header2.classList = "col";
+  header2.innerText = "Path";
+  let header3 = document.createElement("th");
+  header3.classList = "col";
+  header3.innerText = "Read";
+  let header4 = document.createElement("th");
+  header4.classList = "col-xs-3";
+  header4.innerText = "Write";
+
+  let header5 = document.createElement("th");
+  header5.classList = "col";
+  header5.innerText = "Execute";
+  let header6 = document.createElement("th");
+  header6.classList = "col";
+  header6.innerText = "accessTimefrom";
+  let header7 = document.createElement("th");
+  header7.classList = "col";
+  header7.innerText = "accessTimeto";
+  let header8 = document.createElement("th");
+  header8.classList = "col";
+  header8.innerText = "Set";
+
+  headerRow.appendChild(header1);
+  //headerRow.appendChild(header2);
+  headerRow.appendChild(header3);
+  headerRow.appendChild(header4);
+
+  headerRow.appendChild(header5);
+
+  headerRow.appendChild(header6);
+
+  headerRow.appendChild(header7);
+
+  headerRow.appendChild(header8);
+
+  table.appendChild(headerRow);
+
+  // create table rows
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+    let row = document.createElement("tr");
+    let cell1 = document.createElement("td");
+    cell1.classList = "col";
+    let name = file.file_path.split("Data/");
+    cell1.innerText = name[1];
+    let cell2 = document.createElement("td");
+    cell2.classList = "col-xs-5";
+    cell2.innerText = file.file_path;
+    let cell3 = document.createElement("td");
+    cell3.classList = "col";
+    if (file.permission.read == 1) {
+    cell3.innerHTML = `<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" name="read" value="read" id="readBox-${file.id}">
+    
+  </div>`;
+    }else{
+      cell3.innerHTML = `<div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" name="read" value="read" disabled id="readBox-${file.id}">
+      
+    </div>`;
+    }
+    // let writeCheck = document.createElement("div")
+    // writeCheck.classList="form-check"
+    // let writeCheckBox = document.createElement("input")
+    // writeCheckBox.classList = `form-check-input`
+    // writeCheckBox.setAttribute("type","checkbox");
+    //writeCheckBox.setAttribute("checked","");
+    //writeCheckBox.onclick = function (event) {
+    //  writeCheckBox.setAttribute("checked","");
+    //   writeCheckBox.removeAttribute("checked")
+    //console.log(writeCheckBox.checked)
+
+    //   i= 0
+
+    //};
+    //writeCheckBox.setAttribute("checked","false");
+    //writeCheck.append(writeCheckBox)
+    //   `
+    //   <input class="form-check-input" type="checkbox" value="" id="flexCheckIndeterminate" checked>
+
+    // `;
+    // cell3.appendChild(writeCheck)
+    let cell4 = document.createElement("td");
+    cell4.classList = "col-xs-6";
+    if (file.permission.write == 1) {
+    cell4.innerHTML = `<div class="form-check">
+    <input class="form-check-input" type="checkbox" name="write" value="write" id="writeBox-${file.id}" >
+    <label class="form-check-label" for="writeBox">
+      
+    </label>
+  </div>`;
+    }else{
+      cell4.innerHTML = `<div class="form-check">
+      <input class="form-check-input" type="checkbox" name="write" value="write" disabled id="writeBox-${file.id}" >
+      <label class="form-check-label" for="writeBox">
+        
+      </label>
+    </div>`;
+    }
+    // innerText = "Edit";
+    // editButton.onclick = function () {
+    //   addEditUModal(file.id,name[1]);
+    // };
+    // cell4.appendChild();
+    let cell5 = document.createElement("td");
+    cell5.classList = "col";
+    if (file.permission.execute == 1) {
+    cell5.innerHTML = `<div class="form-check">
+    <input class="form-check-input" type="checkbox" value="execute" id="executeBox-${file.id}" >
+    <label class="form-check-label" for="executeBox">
+      
+    </label>
+  </div>`;
+    }else{
+      cell5.innerHTML = `<div class="form-check">
+    <input class="form-check-input" type="checkbox" value="execute" disabled id="executeBox-${file.id}" >
+    <label class="form-check-label" for="executeBox">
+      
+    </label>
+  </div>`;
+    }
+    let cell6 = document.createElement("td");
+    cell6.classList = "col";
+    cell6.innerHTML = `<div class="cs-form">
+  <input type="time" class="form-control" id="timefrom" value="00:00" />
+  </div>`;
+    let cell7 = document.createElement("td");
+    cell7.classList = "col";
+    cell7.innerHTML = `<div class="cs-form">
+<input type="time" class="form-control" id="timeto" value="23:59" />
+</div>`;
+    let cell8 = document.createElement("td");
+    cell8.classList = "col";
+    let filePerbtn = document.createElement("button");
+    filePerbtn.innerText = "set";
+    filePerbtn.onclick = function () {
+      setFileOrder(file.id, file.file_path, user_id);
+    };
+    // let cell6 = document.createElement("td");
+    // cell5.classList = "col-xs-1";
+    // let dowloadButton = document.createElement("button");
+    // dowloadButton.innerText = "download";
+    // dowloadButton.setAttribute("onclick",`window.location.href = '/fileEdit/download/${file.id}'`)
+
+    // cell6.appendChild(dowloadButton);
+    row.appendChild(cell1);
+    //row.appendChild(cell2);
+    row.appendChild(cell3);
+    row.appendChild(cell4);
+    //if(Grole=="ADMIN"||Grole=="OPERATOR"){
+    cell8.appendChild(filePerbtn);
+    row.appendChild(cell5);
+
+    // }
+    row.appendChild(cell6);
+    row.appendChild(cell7);
+    row.appendChild(cell8);
+    table.appendChild(row);
+  }
+
+  modalCon.append(table);
+  let backBtn = document.createElement("div");
+  backBtn.innerHTML = `  <div class="newPost"> <div class="buttons">
+<button data-func="hide" type="button">Ok</button></div> </div>`;
+  modalCon.appendChild(backBtn);
+  // if (data instanceof Blob){
+
+  //   const img = createImage(URL.createObjectURL(data));
+  //   function createImage(src) {
+  //       const img = document.createElement("img");
+  //       img.style="width: 650px; "
+  //       img.src = src;
+  //       return img;
+  //     }
+  // let databox = document.createElement("div")
+
+  // databox.append(img)
+  // document.getElementById("databox").append(databox)
+  //  modal_content.append(img);
+  //$('.editor').appendChild(img)
+  // document.querySelector('.editor').append(img)
+  // document.querySelector('.buttons').classList.add("visually-hidden")
+  // localStorage.removeItem("wysiwyg");
+
+  // }else{
+
+  let i = 0;
+  $(".modal").click(function (event) {
+    // event.preventDefault()
+    i = 1;
+  });
+  $("#readBox").click(function (event) {
+    console.log(this.value);
+  });
+
+  $(".modal-background").click(function () {
+    if (i == 0) {
+      $("#modal-container").addClass("out");
+      $("#modal-container").removeClass("modal-active");
+    } else {
+      i = 0;
+    }
+  });
+
+  $('button[data-func="hide"]').click(function () {
+    $("#modal-container").addClass("out");
+    $("#modal-container").removeClass("modal-active");
+  });
+
+  //if(typeof(Storage) !== "undefined" && localStorage.getItem("wysiwyg") ) {
+}
+
+
+function createManUserModal(data, name, file_id, user_id) {
+  var buttonId = "one"; //$(this).attr('id');
+  $("#modal-container").removeAttr("class").addClass(buttonId);
+  $("#modal-container").addClass("modal-active");
+
+  let modalCon = document.getElementById("modCon");
+  $(".modal").attr("style", "padding: 20px");
+  let modal_content = document.createElement("div");
+  modal_content.onclick = function (event) {
+    event.preventDefault();
+  };
+  modalCon.innerHTML = ``;
+
+  // if(Grole=="ADMIN" || Grole == "OPERATOR"){
+  // buttonStr = ` <button data-func="clear" type="button">clear</button>
+  // <button data-func="save" type="button">save</button>`
+  // }else{
+  //   buttonStr = ``
+  // }
+  files = data;
+  userFiles = [];
+ 
+  if (data.files && data.userFiles) {
+    files = data.files;
+    userFiles = data.userFiles; 
+    if(file_id){
+      files = files.filter((file) => {
+       return file.id === file_id      
+    })
+  }
+  }
+
+  let table = document.createElement("table");
+  table.classList = "table table-fixed bg-light";
+  table.innerHTML = "";
+  //if(role=="USER"){
+  // create table header
+  let headerRow = document.createElement("tr");
+  let header1 = document.createElement("th");
+  header1.classList = "col-xs";
+  header1.innerText = "Filename";
+  let header2 = document.createElement("th");
+  header2.classList = "col";
+  header2.innerText = "Path";
+  let header3 = document.createElement("th");
+  header3.classList = "col";
+  header3.innerText = "order";
+ 
+  let header6 = document.createElement("th");
+  header6.classList = "col";
+  header6.innerText = "accessTimefrom";
+  let header7 = document.createElement("th");
+  header7.classList = "col";
+  header7.innerText = "accessTimeto";
+  let header8 = document.createElement("th");
+  header8.classList = "col";
+  header8.innerText = "Set";
+
+  headerRow.appendChild(header1);
+  //headerRow.appendChild(header2);
+  headerRow.appendChild(header3);
+  // headerRow.appendChild(header4);
+
+  // headerRow.appendChild(header5);
+
+  headerRow.appendChild(header6);
+
+  headerRow.appendChild(header7);
+
+  headerRow.appendChild(header8);
+
+  table.appendChild(headerRow);
+
+  // create table rows
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+    let row = document.createElement("tr");
+    let cell1 = document.createElement("td");
+    cell1.classList = "col";
+    let name = file.file_path.split("Data/");
+    cell1.innerText = name[1];
+    let cell2 = document.createElement("td");
+    cell2.classList = "col";
+    cell2.innerText = file.file_path;
+    let cell3 = document.createElement("td");
+    cell3.classList = "col";
+    
+      cell3.innerHTML = `  
+      <select class="form-select" id="fileManorder" style="
+      width: 155px;
+  ">
+        <option selected value="USER">USER</option>
+        <option value="OPERATOR">OPERATOR</option>
+        <option value="ADMIN">ADMIN</option> 
+      </select>`;
+    
+    // let writeCheck = document.createElement("div")
+    // writeCheck.classList="form-check"
+    // let writeCheckBox = document.createElement("input")
+    // writeCheckBox.classList = `form-check-input`
+    // writeCheckBox.setAttribute("type","checkbox");
+    //writeCheckBox.setAttribute("checked","");
+    //writeCheckBox.onclick = function (event) {
+    //  writeCheckBox.setAttribute("checked","");
+    //   writeCheckBox.removeAttribute("checked")
+    //console.log(writeCheckBox.checked)
+
+    //   i= 0
+
+    //};
+    //writeCheckBox.setAttribute("checked","false");
+    //writeCheck.append(writeCheckBox)
+    //   `
+    //   <input class="form-check-input" type="checkbox" value="" id="flexCheckIndeterminate" checked>
+
+    // `;
+    // cell3.appendChild(writeCheck)
+    let cell4 = document.createElement("td");
+    cell4.classList = "col-xs-6";
+  
+    // innerText = "Edit";
+    // editButton.onclick = function () {
+    //   addEditUModal(file.id,name[1]);
+    // };
+    // cell4.appendChild();
+    let cell5 = document.createElement("td");
+    cell5.classList = "col";
+   
+    let cell6 = document.createElement("td");
+    cell6.classList = "col";
+    cell6.innerHTML = `<div class="cs-form">
+  <input type="time" class="form-control" id="timefrom" value="${file.access_time_from}" />
+  </div>`;
+    let cell7 = document.createElement("td");
+    cell7.classList = "col";
+    cell7.innerHTML = `<div class="cs-form">
+    <input type="time" class="form-control" id="timeto" value="${file.access_time_to}" />
+    </div>`;
+    let cell8 = document.createElement("td");
+    cell8.classList = "col";
+    let filePerbtn = document.createElement("button");
+    filePerbtn.innerText = "set";
+    filePerbtn.onclick = function () {
+      setManFileOrder(file.id, file.file_path, user_id);
+    };
+    // let cell6 = document.createElement("td");
+    // cell5.classList = "col-xs-1";
+    // let dowloadButton = document.createElement("button");
+    // dowloadButton.innerText = "download";
+    // dowloadButton.setAttribute("onclick",`window.location.href = '/fileEdit/download/${file.id}'`)
+
+    // cell6.appendChild(dowloadButton);
+    row.appendChild(cell1);
+    //row.appendChild(cell2);
+    row.appendChild(cell3);
+   // row.appendChild(cell4);
+    //if(Grole=="ADMIN"||Grole=="OPERATOR"){
+    cell8.appendChild(filePerbtn);
+    //row.appendChild(cell5);
+
+    // }
+    row.appendChild(cell6);
+    row.appendChild(cell7);
+    row.appendChild(cell8);
+    table.appendChild(row);
+  }
+
+  modalCon.append(table);
+  let backBtn = document.createElement("div");
+  backBtn.innerHTML = `  <div class="newPost"> <div class="buttons">
+<button data-func="hide" type="button">Ok</button></div> </div>`;
+  modalCon.appendChild(backBtn);
+  // if (data instanceof Blob){
+
+  //   const img = createImage(URL.createObjectURL(data));
+  //   function createImage(src) {
+  //       const img = document.createElement("img");
+  //       img.style="width: 650px; "
+  //       img.src = src;
+  //       return img;
+  //     }
+  // let databox = document.createElement("div")
+
+  // databox.append(img)
+  // document.getElementById("databox").append(databox)
+  //  modal_content.append(img);
+  //$('.editor').appendChild(img)
+  // document.querySelector('.editor').append(img)
+  // document.querySelector('.buttons').classList.add("visually-hidden")
+  // localStorage.removeItem("wysiwyg");
+
+  // }else{
+
+  let i = 0;
+  $(".modal").click(function (event) {
+    // event.preventDefault()
+    i = 1;
+  });
+  $("#readBox").click(function (event) {
+    console.log(this.value);
+  });
+
+  $(".modal-background").click(function () {
+    if (i == 0) {
+      $("#modal-container").addClass("out");
+      $("#modal-container").removeClass("modal-active");
+    } else {
+      i = 0;
+    }
+  });
+  let access_time_from = document.getElementById("timefrom")
+  let access_time_to = document.getElementById("timeto")
+  let selectFile = document.getElementById("fileManorder");
+  selectFile.onchange =(event)=>{
+    if(event.target.value=="ADMIN" && Grole == "ADMIN"){
+    
+   access_time_from.setAttribute("disabled","")
+   access_time_to.setAttribute("disabled","")
+}else{
+    
+  access_time_from.removeAttribute("disabled")
+  access_time_to.removeAttribute("disabled")
+}
+  }
+
+
+  $('button[data-func="hide"]').click(function () {
+    $("#modal-container").addClass("out");
+    $("#modal-container").removeClass("modal-active");
+  });
+
+  //if(typeof(Storage) !== "undefined" && localStorage.getItem("wysiwyg") ) {
+}
+
+async function addSetModal(user_id, name, file_id) {
+  await fetchPost("/fileEdit/getFilePer", { file_id, user_id }, true)
+    .then((response) => {
+      return response;
+    })
+    .then((data) => {
+      createManUserModal(data, name, file_id, user_id);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+
+  
 function addUploadSetDigModal(id, name) {
   fetch(`/fileEdit/getUsers/`)
     .then((response) => {
@@ -1260,19 +1793,158 @@ async function showForAdmin() {
   await fetchPost("/fileEdit/getRole", {}, true)
     .then((role) => {
       Grole = role;
-      if (role == "ADMIN" )  {
+      if(role=="SUPERADMIN"){
+        let controlNav = document.getElementById("controlnav")
+        controlNav.classList.remove("visually-hidden")
+        let fileDiv = document.getElementById("filediv")
+        let fileEditorNav = document.getElementById("fileeditnav")
+        fileEditorNav.onclick = (event)=>{
+          event.preventDefault()
+          fileDiv.innerHTML= `
+          
+          <h3 class="ms-1">Список файлов</h3>
+          <table id="fileTable" ></table>`
+          updateTable()
+        }
+        let userCreateNav = document.getElementById("usercrnav")
+        userCreateNav.onclick= (event)=>{
+          event.preventDefault()
+          fileDiv.innerHTML= `
+          
+    <div class="confirm">
+    <i class='close'>×</i>
+    <h1><i class="fa fa-check-circle fa-3x"></i>Great! Profile Created</h1>
+  </div>
+  <form action="#" class="userform">
+    <h1>
+      Create User Profile
+      <br>
+      <i class="fa fa-camera-retro fa-lg"></i>
+    </h1>
+        
+    <div class="float-label">
+    <input type="text" name="f-name" id="userName" />
+    <label for="f-name">Name</label>
+  </div>
+    
+    <div class="float-label">
+      <input type="email" name="email" id="userlogin" />
+      <label for="email">Email</label>
+    </div>
+      
+    <div class="float-label">
+      <i class="fa fa-caret-down"></i>
+      <select id="roleselect" name="units">
+        <option value=""></option>
+        <option value="USER">USER</option>
+        <option value="OPERATOR">OPERATOR</option>
+        <option value="ADMIN">ADMIN</option>
+      </select>    
+      <label for="role"> Role</label>
+    </div>
+    
+    <!--Row-->
+    <div class='row'>
+    
+   
+    </div>
+    <div class="float-label">
+      <fa class="fa eye fa-eye-slash"></fa>
+      <input type="password" name="pw" id="pw" />
+      <label for="pw">Password</label>
+    </div>
+    
+    <div class="float-label">
+      <textarea name="notes" id="notes"></textarea>
+      <label for="notes">Notes</label>
+    </div>
+    <button class="Ubtn" type="submit" id="registerbtn">Submit</button>
+    <button class="Ubtn" id="clear" type="reset" value="Reset">Reset</button>
+  </form>  
+          `
+
+        
+            function floatLabel(inputType){
+              $(inputType).each(function(){
+                var input = $(this).find("input, select, textarea");
+                var label = $(this).find("label");
+                // on focus add cladd active to label
+                input.focus(function(){
+                  input.next().addClass("active");
+                  console.log("focus");
+                });
+                //on blur check field and remove class if needed
+                input.blur(function(){
+                  if(input.val() === '' || input.val() === 'blank'){
+                    label.removeClass();
+                  }
+                });
+              });
+            }
+            // just add a class of "floatLabel to any group you want to have the float label interactivity"
+            floatLabel(".float-label");
+            
+            
+          //////  Just a bunch of fluff for other interactions  ////////////////////////////////////////////////////////  
+            
+            //for the pw field - toggle visibility
+            $(".eye").on("click" , function(){
+              var $this = $(this);
+              if( !$this.is(".show") ){
+                $this.addClass("show")
+                     .removeClass("fa-eye-slash")
+                     .addClass("fa-eye").next()
+                     .attr("type" , "text");
+              }else{
+                $this.removeClass("show")
+                     .addClass("fa-eye-slash")
+                     .removeClass("fa-eye")
+                     .next().attr("type" , "password");
+              }
+            });
+            
+            //modal close
+            $(".close").on("click" , function(){
+              $(this).parent().removeClass("show");
+              $("#clear").click();
+            })
+            //close on all click 
+              $(".confirm").on("click" , function(){
+              $(this).removeClass("show");
+              $("#clear").click();
+            })
+            
+            //submit button dirty validation ^-^
+            $("button[type='submit']").on("click" , function(){
+              if( !$("input, select, textarea").val() ){ 
+                $(this).text("Please enter all Fields");
+              }else{
+                $(".confirm").addClass("show");
+              }
+              return false;
+            })
+            //just for reset button
+            $("#clear").on("click" , function(){
+              $(".active").removeClass("active");
+            });
+       
+            addUser()
+        }
+        
+      }
+      if (role == "ADMIN" || Grole == "SUPERADMIN" )  {
         let modCheck = document.getElementById("modcheck");
           modCheck.classList.remove("visually-hidden")
         let UserListC = document.getElementById("UserListC");
         UserListC.classList.remove("visually-hidden");
       }
-      if (role == "ADMIN" || role == "OPERATOR") {
+      if (role == "ADMIN" || role == "OPERATOR" || Grole == "SUPERADMIN") {
         isShow = true;
         let crMod = document.getElementById("addNewFile");
 
         crMod.classList.remove("visually-hidden");
       }
-      if (role == "ADMIN") {
+      if (role == "ADMIN"|| Grole == "SUPERADMIN") {
         let selectDfile = document.getElementById("fileorder");
         let optionC = `<option value="ADMIN">ADMIN</option>`;
         selectDfile.innerHTML += optionC;
@@ -1290,13 +1962,17 @@ async function showForDigAdmin() {
   await fetchPost("/fileEdit/getRole", {}, true)
     .then((role) => {
       Grole = role;
-      if (role == "ADMIN" )  {
+      if(role=="SUPERADMIN"){
+        let controlNav = document.getElementById("controlnav")
+        controlNav.classList.remove("visually-hidden")
+      }
+      if (role == "ADMIN" || Grole == "SUPERADMIN")  {
         let modCheck = document.getElementById("modcheck");
           modCheck.classList.remove("visually-hidden")
         let UserListC = document.getElementById("UserListC");
         UserListC.classList.remove("visually-hidden");
       }
-      if (role == "ADMIN" || role == "OPERATOR") {
+      if (role == "ADMIN" || role == "OPERATOR" || Grole == "SUPERADMIN") {
         isShow = true;
         let crMod = document.getElementById("addNewFile");
 
@@ -1374,7 +2050,7 @@ function createModal(data, name, id,permission) {
   localStorage.removeItem("wysiwyg");
   let buttonStr;
   
-  if (Grole == "ADMIN" || Grole == "OPERATOR" ) {
+  if (Grole == "ADMIN" || Grole == "OPERATOR" || Grole == "SUPERADMIN") {
     buttonStr = ` <button data-func="clear" type="button">clear</button>
     <button data-func="save" type="button">save</button>`;
     
@@ -1599,15 +2275,23 @@ function updateUserTable() {
           deleteUser(user.id_user, user.login);
         };
         cell5.appendChild(deleteButton);
+        if (user.role != "SUPERADMIN" ) {
+         
+      
         row.appendChild(cell1);
         //row.appendChild(cell2);
         row.appendChild(cell3);
-        if (user.role != "ADMIN") {
+        if (user.role != "ADMIN" && user.role != "SUPERADMIN" ) {
+          row.appendChild(cell4);
+          row.appendChild(cell5);
+        }
+         if(Grole == "SUPERADMIN"){
           row.appendChild(cell4);
           row.appendChild(cell5);
         }
         table.appendChild(row);
       }
+    }
     })
     .catch((err) => {
       console.log(err);
@@ -1629,31 +2313,41 @@ function updateTable() {
       // create table header
       let headerRow = document.createElement("tr");
       let header1 = document.createElement("th");
-      header1.classList = "col-xs-2";
+      header1.classList = "col";
       header1.innerText = "Filename";
       let header2 = document.createElement("th");
-      header2.classList = "col-xs-3";
+      header2.classList = "col";
       header2.innerText = "Path";
       let header3 = document.createElement("th");
-      header1.classList = "col-xs-2";
+      header3.classList = "col";
       header3.innerText = "Order";
       let header4 = document.createElement("th");
-      header1.classList = "col-xs-2";
+      header4.classList = "col";
       header4.innerText = "Edit";
       let header5 = document.createElement("th");
-      header1.classList = "col-xs-2";
+      header5.classList = "col";
       header5.innerText = "delete";
       let header6 = document.createElement("th");
-      header6.classList = "col-xs-2";
+      header6.classList = "col";
       header6.innerText = "download";
+
+      let header7 = document.createElement("th");
+      header7.classList = "col";
+      header7.innerText = "setOrder";
+      
       headerRow.appendChild(header1);
       //headerRow.appendChild(header2);
       headerRow.appendChild(header3);
       headerRow.appendChild(header4);
-      if (Grole == "ADMIN" || Grole == "OPERATOR") {
-        headerRow.appendChild(header5);
-      }
       headerRow.appendChild(header6);
+      if (Grole == "ADMIN" || Grole == "OPERATOR"|| Grole == "SUPERADMIN") {
+        headerRow.appendChild(header5);
+        if(Grole != "OPERATOR") 
+        headerRow.appendChild(header7);
+      }
+ 
+      
+    
       table.appendChild(headerRow);
 
       // create table rows
@@ -1665,13 +2359,13 @@ function updateTable() {
         let name = file.file_path.split("Data/");
         cell1.innerText = name[1];
         let cell2 = document.createElement("td");
-        cell2.classList = "col-xs-3";
+        cell2.classList = "col";
         cell2.innerText = file.file_path;
         let cell3 = document.createElement("td");
-        cell3.classList = "col-xs-3";
+        cell3.classList = "col";
         cell3.innerText = file.order;
         let cell4 = document.createElement("td");
-        cell4.classList = "col-xs-3";
+        cell4.classList = "col";
         let editButton = document.createElement("button");
         editButton.innerText = "Edit";
         editButton.onclick = function () {
@@ -1679,31 +2373,45 @@ function updateTable() {
         };
         cell4.appendChild(editButton);
         let cell5 = document.createElement("td");
-        cell5.classList = "col-xs-3";
+        cell5.classList = "col";
         let deleteButton = document.createElement("button");
         deleteButton.innerText = "delete";
         deleteButton.onclick = function () {
           deleteFile(file.id, file.file_path);
         };
         let cell6 = document.createElement("td");
-        cell5.classList = "col-xs-3";
+        cell5.classList = "col";
         let dowloadButton = document.createElement("button");
         dowloadButton.innerText = "download";
         dowloadButton.setAttribute(
           "onclick",
           `window.location.href = '/fileEdit/download/${file.id}'`
         );
-
         cell6.appendChild(dowloadButton);
+        let cell7 = document.createElement("td");
+        cell7.classList = "col";
+
+        let setPerbtn = document.createElement("button");
+        setPerbtn.innerText = "setOrder";
+        setPerbtn.onclick = function () {
+          addSetModal( "",file.file_path,file.id);
+        };
+        cell7.appendChild(setPerbtn);
+      
         row.appendChild(cell1);
         //row.appendChild(cell2);
         row.appendChild(cell3);
         row.appendChild(cell4);
-        if (Grole == "ADMIN" || Grole == "OPERATOR") {
+        row.appendChild(cell6);
+        if (Grole == "ADMIN" || Grole == "OPERATOR" || Grole == "SUPERADMIN") {
           cell5.appendChild(deleteButton);
           row.appendChild(cell5);
+          if(Grole != "OPERATOR") 
+          row.appendChild(cell7);
         }
-        row.appendChild(cell6);
+    
+       
+       
         table.appendChild(row);
       }
     })
@@ -1743,106 +2451,46 @@ async function deleteUser(id, login) {
 }
 
 async function addUser() {
-  let regCrBtn = document.createElement("regCrBtn");
-  regCrBtn.addEventListener("click", () => {
-    let regForm = document.createElement("form");
-    regForm.classList = `row g-3`;
-    regForm.innerHTML = ` <div class="col-md-6">
-        <label for="inputEmail4" class="form-label">Email</label>
-        <input type="email" class="form-control" id="inputEmail4">
-      </div>
-      <div class="col-md-6">
-        <label for="inputPassword4" class="form-label">Password</label>
-        <input type="password" class="form-control" id="inputPassword4">
-      </div>
-      <div class="col-12">
-        <label for="inputAddress" class="form-label">Address</label>
-        <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
-      </div>
-      <div class="col-12">
-        <label for="inputAddress2" class="form-label">Address 2</label>
-        <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-      </div>
-      <div class="col-md-6">
-        <label for="inputCity" class="form-label">City</label>
-        <input type="text" class="form-control" id="inputCity">
-      </div>
-      <div class="col-md-4">
-        <label for="inputState" class="form-label">State</label>
-        <select id="inputState" class="form-select">
-          <option selected>Choose...</option>
-          <option>...</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <label for="inputZip" class="form-label">Zip</label>
-        <input type="text" class="form-control" id="inputZip">
-      </div>
-      <div class="col-12">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="gridCheck">
-          <label class="form-check-label" for="gridCheck">
-            Check me out
-          </label>
-        </div>
-      </div>
-      <div class="col-12">
-        <button type="submit" class="btn btn-primary" id="registerbtn">Create</button>
-      </div>`;
-    let userEdd = document.getElementById("UserEditdiv");
-    userEdd.innerHTML = ``;
-    userEdd.append(regForm);
-
     const registerbtn = document.getElementById("registerbtn");
     if (registerbtn) {
       registerbtn.onclick = async (event) => {
         event.preventDefault();
-        const login = document.getElementById("crlogin").value;
-        const password = document.getElementById("crpwd").value;
-        const confpwd = document.getElementById("confpwd").value;
-        const userfirstName = document.getElementById("userName").value;
-        const userSername = document.getElementById("userSername").value;
-        const password_type = document.getElementById("password_type").value;
-        let userName = `${userfirstName} ${userSername}`;
+        const userName = document.getElementById("userName").value;
+        const login = document.getElementById("userlogin").value;
+        const password = document.getElementById("pw").value;
+        const selectRole  = document.getElementById("roleselect")
 
+        let role = selectRole.value
         // let numRuleRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$")
         // let spRegex =new RegExp("^(?=.*[A-Za-z])(?.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d\$!%*#?&]{8,}\$")
 
-        if (login != "" && password != "" && password == confpwd) {
-          if (
-            (password_type == "strong" && checkPassType(password)) ||
-            password_type == "simple"
-          ) {
+        if (login != "" && password != "") {
+           
             const rez = await fetchPost(
               "login/register",
-              { login, password, userName },
+              { login, password, userName,role },
               true
             );
+          
             makeToast({
               header: "Успіх",
               body: rez,
               type: "success",
               data_delay: 7000,
             });
+            updateUserTable()
           } else {
             makeToast({
               header: "Denaid",
-              body: `password does not matches password type ${password_type}`,
+              body: `Empy field login`,
               type: "danger",
               data_delay: 7000,
             });
           }
-        } else {
-          makeToast({
-            header: "Denaid",
-            body: "Empy field login",
-            type: "danger",
-            data_delay: 7000,
-          });
-        }
+   
       };
     }
-  });
+
 }
 
 async function uploadFile() {
