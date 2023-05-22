@@ -1810,7 +1810,10 @@ async function showForAdmin() {
         userCreateNav.onclick= (event)=>{
           event.preventDefault()
           fileDiv.innerHTML= `
-          
+          <div class="badconfirm">
+  <i class='close'>×</i>
+  <h1><i class="fa fa-sharp fa-solid fa-skull-crossbones"></i>Bad!, have\`nt field</h1>
+</div>
     <div class="confirm">
     <i class='close'>×</i>
     <h1><i class="fa fa-check-circle fa-3x"></i>Great! Profile Created</h1>
@@ -1834,7 +1837,7 @@ async function showForAdmin() {
       
     <div class="float-label">
       <i class="fa fa-caret-down"></i>
-      <select id="roleselect" name="units">
+      <select id="roleselect" name="role">
         <option value=""></option>
         <option value="USER">USER</option>
         <option value="OPERATOR">OPERATOR</option>
@@ -1916,10 +1919,11 @@ async function showForAdmin() {
             
             //submit button dirty validation ^-^
             $("button[type='submit']").on("click" , function(){
-              if( !$("input, select, textarea").val() ){ 
+              if( !$("#userName, #roleselect, #userlogin").val() ){ 
                 $(this).text("Please enter all Fields");
               }else{
                 $(".confirm").addClass("show");
+                $(this).text("Submit");
               }
               return false;
             })
@@ -1991,10 +1995,12 @@ async function showForDigAdmin() {
       //console.log(data.role)
     });
 }
-function createUserModal(id, name) {
+function createUserModal(user) {
+  const [day, month, year] = user.password_end.split("-");
+const userDate = `${day}-${month}-${year}`;
   let modalCon = document.getElementById("UserEditdiv");
   let modal_content = document.createElement("div");
-  modal_content.onclick = function (event) {
+  modal_content.onsubmit = function (event) {
     event.preventDefault();
   };
   // modalCon = ``
@@ -2005,7 +2011,7 @@ function createUserModal(id, name) {
         <div class="col-auto">
             <label class="visually-hidden" for="autoSizingInputGroup">FileName</label>
             <div class="input-group">
-              <div class="input-group-text">${name}</div>
+              <div class="input-group-text">${user.login}</div>
              
             </div>
         </div>
@@ -2018,7 +2024,22 @@ function createUserModal(id, name) {
             
           </select>
         </div>
-       
+
+        <div class="col-auto">
+        <div class="form-check">
+    <input class="form-check-input" type="checkbox" value="locked" ${user.locked==1?"checked":""}  id="lockInput" >
+    <label class="form-check-label" for="lockInput">
+    Locked
+    </label>
+  </div>
+        </div>
+        <div class="col-auto">
+        <label for="startDate">end pass time</label>
+        <input id="endPassDate" class="form-control" type="date" value="${userDate }"
+        min="2023-05-15"  style="
+        margin-top: -8%;"> 
+        </div>
+
         <div class="col-auto">
           <button type="submit" class="btn btn-primary" id="updateUserbtn">Submit</button>
         </div>
@@ -2026,6 +2047,8 @@ function createUserModal(id, name) {
 </div>`;
   modalCon.append(modal_content);
   let selectUser = document.getElementById("userorder");
+  let lockedUser = document.getElementById("lockInput");
+  let endPassUser = document.getElementById("endPassDate");
   if (Grole == "SUPERADMIN") {
     let optionC = `<option value="ADMIN">ADMIN</option>`;
     selectUser.innerHTML += optionC;
@@ -2033,7 +2056,13 @@ function createUserModal(id, name) {
   }
   let updateUserbtn = document.getElementById("updateUserbtn");
   updateUserbtn.onclick = async (event) => {
-    updateUser(id, selectUser.value);
+    let data =
+    {
+      newRole:selectUser.value,
+      locked:lockedUser.checked,
+      password_end:endPassUser.value
+    }
+    updateUser(user.id_user, data);
   };
 }
 function createModal(data, name, id,permission) {
@@ -2261,11 +2290,15 @@ function updateUserTable() {
         //cell2.innerText = user.password_type;
         let cell3 = document.createElement("td");
         cell3.innerText = user.role;
+        if(user.locked>0){
+          row.classList.add("bg-secondary")
+          cell3.innerText = `🩸${user.role} \nwas locked🩸`;
+        }
         let cell4 = document.createElement("td");
         let editButton = document.createElement("button");
         editButton.innerText = "Edit";
         editButton.onclick = function () {
-          createUserModal(user.id_user, user.login);
+          createUserModal(user);
         };
         cell4.appendChild(editButton);
         let cell5 = document.createElement("td");

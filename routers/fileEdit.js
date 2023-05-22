@@ -819,7 +819,7 @@ router.get("/getFile/:id", async (req, res, next) => {
 });
 router.post("/updateUser/:id", async (req, res) => {
   const [{ role }] = await auth.auth(req);
-  const newRole = req.body.data;
+  const {newRole,locked,password_end} = req.body.data;
 
   let permission = "";
   if (role === "USER") permission = "USER";
@@ -830,8 +830,8 @@ router.post("/updateUser/:id", async (req, res) => {
 
   await connection
     .query(
-      "UPDATE `users` SET `role` = ? WHERE `id_user` =? and `role` in (?);",
-      [newRole, req.params.id, permission]
+      "UPDATE `users` SET `role` = ?,`locked`=?,`password_end`=? WHERE `id_user` =? and `role` in (?);",
+      [newRole,locked,password_end, req.params.id, permission]
     )
     .then(([results]) => {
       if (results.length == 0) {
@@ -1051,7 +1051,7 @@ router.get("/getUsers", async (req, res) => {
 
   await connection
     .query(
-      "SELECT `id_user`,`name`, `login`, `role` FROM users where role in(?);",
+      "SELECT `id_user`,`name`, `login`, `role`,`locked`,`password_end` FROM users where role in(?);",
       [permission]
     )
     .then(([results]) => {

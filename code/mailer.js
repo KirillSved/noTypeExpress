@@ -20,7 +20,7 @@ const check4Email = (login) =>{
         reject(new Error('sql error ocurred'))
       } else {
         if (results.length > 0) {
-          resolve(results[0].login)
+          resolve({login:results[0].login,id:results[0].id_user})
         } else { reject(new Error('login does not exits')) }
       }
     })

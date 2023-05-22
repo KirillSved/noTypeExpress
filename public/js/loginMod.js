@@ -406,7 +406,10 @@ function viewMainForm() {
   Jcon.innerHTML = ``;
 
   Jcon.append(mainForm);
-
+  const passwordInput = document.getElementById("pwd")
+     passwordInput.onpaste = (event)=>{
+      event.preventDefault()
+     }
   var pwShown = 0;
 
     document.getElementById("eye").addEventListener(
@@ -428,6 +431,7 @@ function viewMainForm() {
   loginbtn.onclick = async () => {
     const login = document.getElementById("login").value.trim();
     const password = document.getElementById("pwd").value;
+  
     if (login !== "" && password !== "") {
       //let rez ; // try рождает мембрану
       try {
@@ -441,6 +445,9 @@ function viewMainForm() {
         //   type: "danger",
         //   data_delay: 7000,
         // });
+        if(err==`Password has expired,reset password` || err=="User has been locked"){
+          forgotbtn.innerText="Reset Password"
+        }
       }
       setCookie("authorization", rez);
       const check = getCookie("lang");

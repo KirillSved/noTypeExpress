@@ -15,7 +15,16 @@ module.exports.getToken = function getToken(passhash, email, password) {
     })
   })
 }
-
+module.exports.Vtry = function getToken(passhash, password) {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, passhash, function (err, res) {
+      if (res) {
+     
+        resolve(true);
+      } else resolve(false);
+    })
+  })
+}
 module.exports.auth = (req,roles) => {
   return new Promise((resolve, reject) => {
     let token = req.headers['x-access-token'] || req.headers['authorization'] || req.cookies.authorization; // Express headers are auto converted to lowercase

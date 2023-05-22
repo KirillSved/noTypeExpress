@@ -14,6 +14,11 @@ require("./code/jwt_env")
 // // чтобы передать в енв надо использовать export PORT = 3000, SET PORT = 3000
 // const app = express();
 const app = express("express")
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 app.use(express.json())
 const router =  require( "./routers/router.js");
 const PORT = process.env.PORT ?? 3003
