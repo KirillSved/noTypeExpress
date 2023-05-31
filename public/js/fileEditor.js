@@ -1377,6 +1377,22 @@ function createManUserModal(data, name, file_id, user_id) {
   //if(typeof(Storage) !== "undefined" && localStorage.getItem("wysiwyg") ) {
 }
 
+
+
+async function addSetQRModal(user_id, name, file_id) {
+  await fetchPost("/fileEdit/getFileQR", { file_id, user_id }, true)
+    .then((response) => {
+      return response;
+    })
+    .then((data) => {
+      createModal(data, name, file_id,"QR");
+      //createManUserModal(data, name, file_id, user_id);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+
 async function addSetModal(user_id, name, file_id) {
   await fetchPost("/fileEdit/getFilePer", { file_id, user_id }, true)
     .then((response) => {
@@ -2065,6 +2081,12 @@ const userDate = `${day}-${month}-${year}`;
     updateUser(user.id_user, data);
   };
 }
+function createImage(src,widt=650) {
+  const img = document.createElement("img");
+  img.style = `width: ${widt}px;`;
+  img.src = src;
+  return img;
+}
 function createModal(data, name, id,permission) {
   var buttonId = "one"; //$(this).attr('id');
   $("#modal-container").removeAttr("class").addClass(buttonId);
@@ -2087,11 +2109,16 @@ function createModal(data, name, id,permission) {
     buttonStr = ``;
   }
   if(permission){
+ 
   if(permission.write!=1){
     buttonStr = ``;
   }else{
     buttonStr = ` <button data-func="clear" type="button">clear</button>
     <button data-func="save" type="button">save</button>`;
+  }
+  if(permission=="QR"){
+    buttonStr = ` 
+    <button data-func="download" type="button">download</button>`;
   }
 }
   modal_content.innerHTML = `
@@ -2151,12 +2178,7 @@ function createModal(data, name, id,permission) {
   modalCon.append(modal_content);
   if (data instanceof Blob) {
     const img = createImage(URL.createObjectURL(data));
-    function createImage(src) {
-      const img = document.createElement("img");
-      img.style = "width: 650px; ";
-      img.src = src;
-      return img;
-    }
+    
     // let databox = document.createElement("div")
 
     // databox.append(img)
@@ -2166,7 +2188,13 @@ function createModal(data, name, id,permission) {
     document.querySelector(".editor").append(img);
     document.querySelector(".buttons").classList.add("visually-hidden");
     localStorage.removeItem("wysiwyg");
-  } else {
+  } else if(permission =="QR" ){
+    const img = createImage(data,300)
+    modal_content.append(img);
+    //$('.editor').appendChild(img)
+    document.querySelector(".editor").append(img);
+    localStorage.removeItem("wysiwyg");
+  }else {
     $(".newPost button[data-func]").click(function () {
       document.execCommand($(this).data("func"), false);
     });
@@ -2212,7 +2240,13 @@ function createModal(data, name, id,permission) {
       i = 0;
     }
   });
-
+  $('button[data-func="download"]').click(function () {
+    //window.location.href =`/fileEdit/download/${id}`
+  const a = document.createElement("a");
+  a.href = data
+  a.download = `QR_verify_${name}.png`
+  a.click();
+  });
   $('button[data-func="hide"]').click(function () {
     $("#modal-container").addClass("out");
     $("#modal-container").removeClass("modal-active");
@@ -2367,7 +2401,11 @@ function updateTable() {
       let header7 = document.createElement("th");
       header7.classList = "col";
       header7.innerText = "setOrder";
-      
+
+      let header8 = document.createElement("th");
+      header8.classList = "col";
+      header8.innerText = "safeShare";
+
       headerRow.appendChild(header1);
       //headerRow.appendChild(header2);
       headerRow.appendChild(header3);
@@ -2377,6 +2415,9 @@ function updateTable() {
         headerRow.appendChild(header5);
         if(Grole != "OPERATOR") 
         headerRow.appendChild(header7);
+      }
+      if(Grole=="USER"){
+        headerRow.appendChild(header8);
       }
  
       
@@ -2431,6 +2472,15 @@ function updateTable() {
         };
         cell7.appendChild(setPerbtn);
       
+        let cell8 = document.createElement("td");
+        cell8.classList = "col";
+        let getQRbtn = document.createElement("button");
+        getQRbtn.innerText = "share";
+        getQRbtn.onclick = function () {
+          addSetQRModal( "",name[1],file.id);
+        };
+        cell8.appendChild(getQRbtn)
+
         row.appendChild(cell1);
         //row.appendChild(cell2);
         row.appendChild(cell3);
@@ -2443,7 +2493,10 @@ function updateTable() {
           row.appendChild(cell7);
         }
     
-       
+        if(Grole=="USER"){
+          row.appendChild(cell8);
+        }
+   
        
         table.appendChild(row);
       }
@@ -2525,7 +2578,61 @@ async function addUser() {
     }
 
 }
+async function preuploadFile() {
+  // document.body.onsubmit((event)=>{
+  //     event.preventDefault();
+  // })
+  const uploadbtn = document.getElementById("uploadbtn");
+  uploadbtn.onclick = async (event) => {
+    event.preventDefault();
+    const fileInput = document.getElementById("upload-file");
+    const fileOrder = document.getElementById("fileorder");
 
+    // Create a FormData object and append the file to it
+    const formData = new FormData();
+    formData.append(fileOrder.value, fileInput.files[0]);
+
+    try {
+      // Send the file to the server using fetch
+      const response = await fetch("fileEdit/pre_upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        // If the response is ok, close the modal window
+        const bbody = await response.text();
+        makeToast({
+          header: "Успіх",
+          body: bbody,
+          type: "success",
+          data_delay: 7000,
+        });
+        updateTable();
+        fileInput.value = ``;
+      } else {
+        // If the response is not ok, show an error message
+        const error = await response.text();
+        makeToast({
+          header: "Denaid",
+          body: error,
+          type: "danger",
+          data_delay: 7000,
+        });
+        console.log(`Error uploading file: ${error}`);
+      }
+    } catch (error) {
+      // If an error occurs, show an error message
+      makeToast({
+        header: "Denaid",
+        body: error.message,
+        type: "danger",
+        data_delay: 7000,
+      });
+      console.log(`Error uploading file: ${error.message}`);
+    }
+  };
+}
 async function uploadFile() {
   // document.body.onsubmit((event)=>{
   //     event.preventDefault();
@@ -2561,6 +2668,13 @@ async function uploadFile() {
       } else {
         // If the response is not ok, show an error message
         const error = await response.text();
+        makeToast({
+          header: "Denaid",
+          body: error,
+          type: "danger",
+          data_delay: 7000,
+        });
+        console.log(`Error uploading file: ${error}`);
       }
     } catch (error) {
       // If an error occurs, show an error message

@@ -8,13 +8,14 @@ const formidable = require("formidable");
 const parentPathFor = path.resolve(__dirname, "..");
 const fs = require("fs");
 let fileHolderPath = "C:/Users/user/Pictures/TBD_SHVED/Data/";
-
+let  notVerifiedHolderPath = "C:/Users/user/Pictures/TBD_SHVED/NotVerifiedFile/";
 router.get("/", (req, res) => {
   let pathFor = path.resolve(parentPathFor, "public", "FileEditor.html");
   res.status(200).sendFile(pathFor);
 });
 
 var exec = require("child_process").execFile;
+const QRCode = require('qrcode')
 
 async function getUserFilePermissions(fileId, user_id) {
   const ACMode = await getACMode();
@@ -731,6 +732,57 @@ router.get("/getFiles", async (req, res, next) => {
     });
 });
 
+//User upload 
+router.post("/pre_upload", async (req, res, next) => {
+  // const { login, password } = req.body;
+  let mode = await getACMode()
+  const [{ id_user, role, login }] = await auth.auth(req);
+  // new formidable.IncomingForm().parse(req, (err, fields, files) => {
+  //     if (err) {
+  //       console.error('Error', err)
+  //       throw err
+  //     }
+  //     console.log('Fields', fields)
+  //     console.log('Files', files)
+  //     for (const file of Object.entries(files)) {
+  //         console.log(file)
+  //       }
+  //   })
+  new formidable.IncomingForm()
+    .parse(req)
+    .on("fileBegin", (name, file) => {
+      file.path = notVerifiedHolderPath + file.name;
+    })
+
+    .on("file", async (name, file) => {
+      console.log("Uploaded file", name, file);
+      //  if (new Date (results[0].password_end.split('.').reverse().join('-')) < new Date()) {throw new Error("Password has expired,reset password");  }
+      let createDate = new Date(new Date().setDate(new Date().getDate())).toLocaleDateString().split('.').reverse().join('-')
+      let el = file.path;
+      if (mode == "dig") {
+        name = role;
+      }
+      await connection
+        .query("Insert into verify_files (`user_id`,`file_path`, `order`,query_time) values (?,?);", [
+          id_user,
+          el,
+          role,
+          createDate
+        ])
+        .then(async ([results]) => {
+        
+            res.status(200).send("sucsess with it");
+            
+        })
+        .catch((err) => {
+          if (err.code == "ER_DUP_ENTRY") {
+            res.status(500).send("file olready exist");
+          } else res.status(500).send(err.message);
+          throw new Error(err.message);
+        });
+    });
+});
+
 router.post("/upload", async (req, res, next) => {
   // const { login, password } = req.body;
   let mode = await getACMode()
@@ -777,7 +829,7 @@ router.post("/upload", async (req, res, next) => {
         })
         .catch((err) => {
           if (err.code == "ER_DUP_ENTRY") {
-            res.status(400).send("file olready exist");
+            res.status(500).send("file olready exist");
           } else res.status(500).send(err.message);
           throw new Error(err.message);
         });
@@ -1066,6 +1118,35 @@ router.get("/getUsers", async (req, res) => {
       //   });
       //   res.send(results)
     });
+});
+async function generateQRCode(document) {
+  try {
+    const qrCodeData = await QRCode.toDataURL(document);
+    return qrCodeData;
+  } catch (error) {
+    throw new Error('Помилка генерації QR-коду');
+  }
+}
+router.post("/getFileQR", async (req, res, next) => {
+  // const { login, password } = req.body;
+  const { file_id, user_id } = req.body;
+  var userrr = await auth.auth(req).then((u) => {
+    return u[0];
+  });
+  let qrdata =  await generateQRCode(`http://192.168.0.5:3001/fileEdit/download/${file_id}`);
+
+    res.send(qrdata);
+ 
+  
+//  GetManFileFromDatabase(userrr,file_id) //,req.params.id)
+//     .then((resFor) => {
+//       res.send(resFor);
+//       console.log(resFor);
+//     })
+//     .catch((err) => {
+//       res.status(500).send("check correctnes data");
+//       throw new Error("check correctnes data");
+//     });
 });
 
 router.post("/getRole", (req, res) => {
