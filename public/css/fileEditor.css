@@ -8,6 +8,22 @@
 body {
   background: #E9F0F4;
 }
+#faceio-modal {
+  position: relative;
+  z-index: 5;
+}
+.f-hide {
+  display: none;
+  animation: hideBlock 0.7s linear forwards;
+}
+@keyframes hideBlock {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 .badconfirm {
   position: absolute;
   width: 100%;

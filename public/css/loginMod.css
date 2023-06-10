@@ -17,7 +17,10 @@ background-attachment: fixed;
     font-family: 'Abel', sans-serif;
 opacity: .95;
 }
-
+.f-hide {
+  display: none;
+  animation: hideBlock 0.7s linear forwards;
+}
 .b-hide {
   display: block;
   animation: hideBlock 0.7s linear forwards;
@@ -252,7 +255,36 @@ opacity: .95;
   
   cursor: pointer;
 }
+.social-container {
+  position: absolute;
+  top: 28%;
+  top: 55%;
+  left: 61%;
+	margin: 20px 0;
+}
+.social:hover {
+  transform: translatey(3px);
+  box-shadow: none;
+}
 
+/* buttons hover Animation */
+ .social:hover {
+  animation: ani9 0.4s ease-in-out infinite alternate;
+}
+
+
+.social-container a {  
+  color: #99668e;
+  background-color: #e3fbf4;
+	border: 1px solid #fbe2f6;
+	border-radius: 50%;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0 5px;
+	height: 60px;
+	width: 60px;
+}
 /* Show/hide password Font Icon */
 #overform #eye {
     background: #fff;

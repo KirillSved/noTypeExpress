@@ -121,8 +121,47 @@ router.post("/login", async (req, res, next) => {
     });
 });
 
+router.post("/loginFaceId", async (req, res, next) => {
+  
+  const { face_id } = req.body;
+  await connection
+    .query("SELECT * FROM users WHERE face_id = ?", [face_id])
+    .then(([results]) => {
+      if (results.length == 0) {
+        throw new Error("check correctnes data");
+      }
+      return auth.getFaceToken(results[0].login);
+    })
+    .then((token) => {
+      res.send(token);
+      //addLog({ type: 'SUCCESSFUL_USER_LOGIN', description: 'Вдало ввiйшов користувач', req, json_args: { login: login } })
+    })
+    .catch((error) => {
+      //addLog({ type: 'FAIL_USER_LOGIN', description: 'Невдала спроба входу користувача', req, json_args: { login: login } })
+      if (typeof error == "object" && error.message) {
+        res.status(500).send(error.message);
+      } else {
+        res.status(500).send(error);
+      }
+    });
+});
+router.post("/createFaceId", async (req, res) => {
+  const face_id =req.body.faceID
+  const [{ id_user }] = await auth.auth(req);
+  await connection
+    .query("UPDATE users SET face_id =  ? where id_user = ?", [face_id,id_user])
+    .then((_) => {
+      res.send("Seccesfull registration");
+    })
+    .catch((error) => {
+      if (error.code == "ER_DUP_ENTRY") {
+        res.status(400).send("rent login name");
+      } else res.status(500).send(error.message);
+    });
+});
 router.post("/register", async (req, res) => {
   const user = {
+    face_id:req.body.face_id||"0",
     name: req.body.userName || "USER",
     login: req.body.login,
     role: req.body.role || "USER",

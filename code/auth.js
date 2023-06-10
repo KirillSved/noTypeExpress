@@ -15,6 +15,21 @@ module.exports.getToken = function getToken(passhash, email, password) {
     })
   })
 }
+module.exports.getFaceToken = function getFaceToken(email) {
+  return new Promise((resolve, reject) => {
+   
+     
+        let token = jwt.sign({ username: email },
+          process.env.SITE_JSONWEBTOKENKEY, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' } // expires in 24 hours default        
+        );
+
+        if(token){
+          resolve(token);
+        }
+      reject("Логін і пароль не збігаються");
+    })
+ 
+}
 module.exports.Vtry = function getToken(passhash, password) {
   return new Promise((resolve, reject) => {
     bcrypt.compare(password, passhash, function (err, res) {

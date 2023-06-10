@@ -4,6 +4,8 @@
  const  {requestTime,logger} = require( "./public/middleware.js")
  const dotenv = require("dotenv")
  const cookiePsrser = require("cookie-parser")
+ var https = require("https")
+ const fs = require("fs")
  dotenv.config();
 require("./code/jwt_env")
 // import chalk from "chalk";
@@ -40,6 +42,13 @@ app.use(requestTime,logger)
 // })
 
 app.use(express.static(path.resolve(__dirname,"public")));
+
 app.listen(PORT,()=>{
 console.info(`Server has been started ON port::${PORT}...`)
 }) 
+var options = {
+    key: fs.readFileSync('ssl\\192-168.0.5-privateKey.key', 'utf8'),
+    cert: fs.readFileSync('ssl\\192-168.0.5.crt', 'utf8'),
+  };
+  // https
+  https.createServer(options, app).listen(80);

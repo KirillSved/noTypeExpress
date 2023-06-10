@@ -1,3 +1,4 @@
+
 class viewForm {
   mainForm() {
     document.getElementById("Jcon").className = "conteiner-md p-5 b-show";
@@ -19,6 +20,10 @@ class viewForm {
        </header>
        <!--     End  header Content  -->
        <br>
+       <div class="social-container">
+       <a href="#" class="social" id="faceidbtn"><i class="fab fa-facebook-f" aria-hidden="true">@SE </i><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+
+       </div>
        <div class="field-set">
          
           <!--   user name -->
@@ -45,6 +50,7 @@ class viewForm {
          
          
           <br>
+          
     <!--        buttons -->
     <!--      button LogIn -->
           <button class="log-in" id="loginbtn"> Log In </button>
@@ -81,8 +87,8 @@ class viewForm {
   <!-- progressbar -->
   <ul id="progressbar">
     <li class="active">Account Setup</li>
-    <li>Social Profiles</li>
-    <li>Personal Details</li>
+    <li>CREATE YOURT ACCOUNT</li>
+    <li>Fase id</li>
   </ul> 
 
 
@@ -183,13 +189,61 @@ class viewForm {
              
        <button class="log-in previous submits action-button" name="previous" id="previous">  Previous</button>
  
-       <button class="log-in submits action-button" name="next" id="registerbtn"> Sign Up </button>
+       <button class="log-in next submits action-button" name="next" id="next"> Next </button>
 
            
 
   </fieldset>
 
   
+  <!-- 3 fieldsets -->
+
+  <fieldset>
+  <h2 class="fs-title">Personal Details</h2>
+  <h3 class="fs-subtitle">We will never sell it</h3>
+  
+  
+  <span class="input-item " style="padding-top:16px;padding-right: 6px;">
+  <i class="fa fa-user-circle" aria-hidden="true"></i>
+  </span>
+
+  <!--   Telegram social name Input-->
+
+
+  <button class="form-input action-button" name="next" id="face_registerbtn" style=""> Create faceId </button>
+  
+<br>
+<h3 class="fs-subtitle">Status face registation <span class="form-item " style="padding-top:16px;padding-right: 6px;">
+<div id="statusregbad" style="height:0px">
+not register
+<br>
+<span class="form-item " style="padding-top:16px;padding-right: 6px;">
+<i class="fa fa-x-ray fa-fade" style="color:red;" aria-hidden="true"></i>
+</span>
+<span class="form-item " style="padding-top:16px;padding-right: 6px;">
+<i class="fa fa-x-ray" style="color:red; " aria-hidden="true"></i>
+<i class="fa fa-x-ray" style="color:red; " aria-hidden="true"></i>
+<i class="fa fa-x-ray" style="color:red; " aria-hidden="true"></i>
+<i class="fa fa-x-ray" style="color:red; " aria-hidden="true"></i>
+</span>
+</div>
+<div class="visually-hidden" id="statusregood" style="height:0px">
+register<br>
+<span class="form-item " style="padding-top:16px;padding-right: 6px;">
+<i class="fa fa-solid fa-check" style="color:green; " aria-hidden="true"></i>
+<i class="fa fa-solid fa-check" style="color:green; " aria-hidden="true"></i>
+<i class="fa fa-solid fa-check" style="color:green; " aria-hidden="true"></i>
+<i class="fa fa-solid fa-check" style="color:green; " aria-hidden="true"></i>
+</span>
+</div>
+</h3>
+
+
+  <button class="log-in previous submits action-button" name="previous" id="previous"> Previous </button>
+
+    <button class="log-in submits action-button" name="next" id="registerbtn" style=""> Sign In </button>
+
+  </fieldset>
 
  
 `;
@@ -293,13 +347,15 @@ class viewForm {
     var current_fs, next_fs, previous_fs; //fieldsets
     var left, opacity, scale; //fieldset properties which we will animate
     var animating;
-    $("#cancelOver").click(function () {
+    $("#cancelOver").click(function (event) {
+      event.preventDefault()
       console.log("cansel");
       document.getElementById("Jcon").className = "conteiner-md p-5 b-hide";
       document.getElementById("Jcon").innerHTML = ``;
       viewMainForm();
     });
-    $(".next").click(function () {
+    $(".next").click(function (event) {
+      // event.preventDefault()
       if (animating) return false;
       animating = true;
 
@@ -340,7 +396,8 @@ class viewForm {
       );
     });
 
-    $(".previous").click(function () {
+    $(".previous").click(function (event) {
+      event.preventDefault()
       if (animating) return false;
       animating = true;
 
@@ -392,8 +449,198 @@ function checkPassType(password) {
   }
   return true;
 }
+const  faceio  =  new  faceIO ( "fioaf11d" );
+
+function enrollNewUser(login){
+
+  // get webcam stream
+  // navigator.mediaDevices 
+  //   .getUserMedia({ video: true })
+  //   .then((stream) => {
+  //     // Create a new FaceIO instance
+  //   })
+  
+  // Start the facial enrollment process
+  document.getElementById("overform").className = "f-hide";
+ 
+  return faceio.enroll({
+      locale: 'ru', // Default user locale
+      payload: {
+        login:login
+      },
+      userConsent: false, // Ask user for consent before starting the enrollment process
+    })
+    .then((userInfo) => {
+      // User Successfully Enrolled!
+          makeToast({
+          header: "User Successfully Enrolled! Details:",
+          body:    `
+          Unique Facial ID: ${userInfo.facialId}
+          Enrollment Date: ${userInfo.timestamp}
+          Gender: ${userInfo.details.gender}
+          Age Approximation: ${userInfo.details.age}`,
+          type: "success",
+          data_delay: 7000,
+        });
+
+      console.log(userInfo)
+      document.getElementById("overform").className = " ";
+      return userInfo
+      // fetch('/login/createFaceId', {
+      //   method: 'POST',
+      //   headers: new Headers({'content-type': 'application/json'}),
+      //   body: {
+      //     faceID: userInfo.facialId,
+      //     userID:
+      //       document.getElementById('userId').value == ''
+      //         ? -1
+      //         : document.getElementById('userId').value,
+      //   },
+      // })
+      //   .then(() => {
+      //     alert(
+      //       `Face ID saved successfully
+      //       Details:
+      //       Unique Facial ID: ${userInfo.facialId}
+      //       Enrollment Date: ${userInfo.timestamp}
+      //       Gender: ${userInfo.details.gender}
+      //       Age Approximation: ${userInfo.details.age}`
+      //     );
+
+          
+      //   })
+      //   .catch(() => alert('Face ID not saved'));
+      // // handle success, save the facial ID, redirect to dashboard...
+    })
+    .catch((errCode) => {
+      document.getElementById("overform").className = " ";
+      handleError(errCode);
+      // handle enrollment failure. Visit:
+      // https://faceio.net/integration-guide#error-codes
+      // for the list of all possible error codes
+    });
+}
+
+function authenticateUser() {
+  
+  // Start the facial authentication process (Identify a previously enrolled user)
+  document.getElementById("Jcon").className = "conteiner-md p-5 f-hide";
+  faceio.authenticate({
+    "locale": "auto" // Default user locale
+  }).then((userData) => {
+     fetchPost("login/loginFaceId", { face_id: userData.facialId, }, false)
+    .then((rez) => {
+          setCookie("authorization", rez);
+          const check = getCookie("lang");
+          if (check === undefined) {
+            setCookie("lang", "ru");
+            document.location.reload();
+          }
+          if (rez) {
+            window.location.href = window.location.href.replace("/login", "/fileEdit");
+          }
+          // alert(
+          //   `Face ID saved successfully
+          //   Details:
+          //   Unique Facial ID: ${userInfo.facialId}
+          //   Enrollment Date: ${userInfo.timestamp}
+          //   Gender: ${userInfo.details.gender}
+          //   Age Approximation: ${userInfo.details.age}`
+          // );
+
+          
+        })
+        .catch((err) => {
+          alert(err); 
+          faceio.restartSession();});
+      // // handle success, save the facial ID, redirect to dashboard...
+    document.getElementById("Jcon").className = "conteiner-md p-5";
+  }).catch(errCode => {
+    // handle authentication failure. Visit:
+    // https://faceio.net/integration-guide#error-codes
+    // for the list of all possible error codes
+    handleError(errCode);
+    
+    // If you want to restart the session again without refreshing the current TAB. Just call:
+    faceio.restartSession();
+    document.getElementById("Jcon").className = "conteiner-md p-5";
+    // restartSession() let you authenticate the same user again (in case of failure) 
+    // without refreshing the entire page.
+    // restartSession() is available starting from the PRO plan and up, so think of upgrading your app
+    // for user usability.
+  });
+}
+function handleError(errCode) {
+  // Log all possible error codes during user interaction..
+  // Refer to: https://faceio.net/integration-guide#error-codes
+  // for a detailed overview when these errors are triggered.
+  switch (errCode) {
+    case fioErrCode.PERMISSION_REFUSED:
+      console.log("Access to the Camera stream was denied by the end user");
+      break;
+    case fioErrCode.NO_FACES_DETECTED:
+      console.log("No faces were detected during the enroll or authentication process");
+      break;
+    case fioErrCode.UNRECOGNIZED_FACE:
+      console.log("Unrecognized face on this application's Facial Index");
+      break;
+    case fioErrCode.MANY_FACES:
+      console.log("Two or more faces were detected during the scan process");
+      break;
+    case fioErrCode.FACE_DUPLICATION:
+      console.log("User enrolled previously (facial features already recorded). Cannot enroll again!");
+      break;
+    case fioErrCode.PAD_ATTACK:
+      console.log("Presentation (Spoof) Attack (PAD) detected during the scan process");
+      break;
+    case fioErrCode.FACE_MISMATCH:
+      console.log("Calculated Facial Vectors of the user being enrolled do not matches");
+      break;
+    case fioErrCode.WRONG_PIN_CODE:
+      console.log("Wrong PIN code supplied by the user being authenticated");
+      break;
+    case fioErrCode.PROCESSING_ERR:
+      console.log("Server side error");
+      break;
+    case fioErrCode.UNAUTHORIZED:
+      console.log("Your application is not allowed to perform the requested operation (eg. Invalid ID, Blocked, Paused, etc.). Refer to the FACEIO Console for additional information");
+      break;
+    case fioErrCode.TERMS_NOT_ACCEPTED:
+      console.log("Terms & Conditions set out by FACEIO/host application rejected by the end user");
+      break;
+    case fioErrCode.UI_NOT_READY:
+      console.log("The FACEIO Widget could not be (or is being) injected onto the client DOM");
+      break;
+    case fioErrCode.SESSION_EXPIRED:
+      console.log("Client session expired. The first promise was already fulfilled but the host application failed to act accordingly");
+      break;
+    case fioErrCode.TIMEOUT:
+      console.log("Ongoing operation timed out (eg, Camera access permission, ToS accept delay, Face not yet detected, Server Reply, etc.)");
+      break;
+    case fioErrCode.TOO_MANY_REQUESTS:
+      console.log("Widget instantiation requests exceeded for freemium applications. Does not apply for upgraded applications");
+      break;
+    case fioErrCode.EMPTY_ORIGIN:
+      console.log("Origin or Referer HTTP request header is empty or missing");
+      break;
+    case fioErrCode.FORBIDDDEN_ORIGIN:
+      console.log("Domain origin is forbidden from instantiating fio.js");
+      break;
+    case fioErrCode.FORBIDDDEN_COUNTRY:
+      console.log("Country ISO-3166-1 Code is forbidden from instantiating fio.js");
+      break;
+    case fioErrCode.SESSION_IN_PROGRESS:
+      console.log("Another authentication or enrollment session is in progress");
+      break;
+    case fioErrCode.NETWORK_IO:
+    default:
+      console.log("Error while establishing network connection with the target FACEIO processing node");
+      break;
+  }
+}
 
 function viewMainForm() {
+ 
   document.getElementById("Jcon").className = "conteiner-md p-5 b-show";
 
   let Jcon = document.getElementById("Jcon");
@@ -426,6 +673,11 @@ function viewMainForm() {
       false
     );
 
+    const faceidloginbtn = document.getElementById("faceidbtn")
+    faceidloginbtn.onclick = async ()=>{
+      faceio.restartSession();
+      authenticateUser()
+    }
   const loginbtn = document.getElementById("loginbtn");
   
   loginbtn.onclick = async () => {
@@ -463,13 +715,40 @@ function viewMainForm() {
 
   const regCrBtn = document.getElementById("regCrBtn");
 
-  regCrBtn.addEventListener("click", () => {
+  regCrBtn.addEventListener("click", (event) => {
+    
+    event.preventDefault()
     document.getElementById("Jcon").className = "conteiner-md p-5 b-hide";
     document.getElementById("Jcon").innerHTML = ``;
     document.getElementById("Jcon").append(regForm);
-
+    let face_id="0";
     cView.nextForm();
-    crEye(["crpwd","confpwd"])
+    crEye(["crpwd","confpwd"]);
+    const face_registerbtn = document.getElementById("face_registerbtn");
+    if (face_registerbtn) {
+      face_registerbtn.onclick = async (event) => {
+        event.preventDefault()
+        const login = document.getElementById("crlogin").value;
+        const badregV = document.getElementById("statusregbad")
+        const goodregV =document.getElementById("statusregood") ;
+        if (login != "") {
+      face_id =  await enrollNewUser(login)
+      face_id=face_id.facialId
+        }else{
+          makeToast({
+            header: "Denaid",
+            body: `Empty field login`,
+            type: "danger",
+            data_delay: 7000,
+          });
+        }
+      if(face_id!="0"){
+        badregV.classList.add("visually-hidden")
+        goodregV.classList.remove("visually-hidden")
+      } 
+      };
+    }
+
     const registerbtn = document.getElementById("registerbtn");
     if (registerbtn) {
       registerbtn.onclick = async (event) => {
@@ -481,7 +760,7 @@ function viewMainForm() {
         const userSername = document.getElementById("userSername").value;
         const password_type = document.getElementById("password_type").value;
         let userName = `${userfirstName} ${userSername}`;
-
+        
         // let numRuleRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$")
         // let spRegex =new RegExp("^(?=.*[A-Za-z])(?.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d\$!%*#?&]{8,}\$")
 
@@ -492,7 +771,7 @@ function viewMainForm() {
           ) {
             const rez = await fetchPost(
               "login/register",
-              { login, password, userName },
+              { login, password, userName,face_id},
               true
             );
             if(rez){

@@ -1,5 +1,6 @@
 /node_modules/
 /public/uploads
+/ssl
 /public/minify-js
 /public/css/main.min.css
 /greenlock.d
